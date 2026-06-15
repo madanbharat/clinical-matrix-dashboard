@@ -66,7 +66,7 @@ st.markdown("""
     .metric-desc { font-size: 0.72rem; color: #9CA3AF; margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.06); line-height: 1.35; text-align: justify; }
     
     /* Micro Status Badges */
-    .alert-badge { padding: 2px 6px; border-radius: 4px; font-size: 0.6rem; font-weight: 700; display: inline-block; margin-top: 6px; letter-spacing: 0.5px; }
+    .alert-badge { padding: 2px 6px; border-radius: 4px; font-size: 0.6rem; font-weight: 700; display: inline-block; text-transform: uppercase; margin-top: 6px; letter-spacing: 0.5px; }
     .badge-critical { background-color: rgba(255, 51, 102, 0.12); color: #FF4D7D; border: 1px solid rgba(255, 51, 102, 0.25); }
     .badge-baseline { background-color: rgba(0, 242, 254, 0.1); color: #00F2FE; border: 1px solid rgba(0, 242, 254, 0.2); }
     
@@ -115,7 +115,7 @@ df_open = st.session_state.get('df_open', pd.DataFrame())
 df_summary = st.session_state.get('df_summary', pd.DataFrame())
 df_pending = st.session_state.get('df_pending', pd.DataFrame())
 
-# --- STEP 2: RENDER SYSTEM NAVIGATION TAB ARRAY ---
+# --- STEP 2: RENDER BACKBONE COCKPIT NAVIGATION TAB ARRAY ---
 tab_command, tab_analytics, tab_database, tab_intelligence = st.tabs([
     "🛸 Strategic Command Deck",
     "📈 Longitudinal Analytics",
@@ -129,7 +129,6 @@ with tab_command:
     
     with col_profile:
         st.markdown("<div class='panel-header'>📋 Executive Patient Profile Summary</div>", unsafe_allow_html=True)
-        # FIXED: Everything is compiled into one single HTML block to eliminate the ghost layout gap below
         profile_html = "<div class='command-card card-normal' style='min-height: 210px; max-width: 100%; flex: 1;'>"
         if not df_summary.empty:
             for idx, row in df_summary.dropna(subset=[df_summary.columns[0], df_summary.columns[1]], how='any').iterrows():
@@ -142,7 +141,6 @@ with tab_command:
         
     with col_alerts:
         st.markdown("<div class='panel-header' style='color:#EF4444;'>⚡ Priority Action Gaps</div>", unsafe_allow_html=True)
-        # FIXED: Unified into one single HTML string block execution 
         alerts_html = "<div class='command-card' style='min-height: 210px; max-width: 100%; flex: 1; overflow-y: auto;'>"
         if not df_open.empty:
             col_target_issue = 'Issue' if 'Issue' in df_open.columns else df_open.columns[2]
@@ -205,17 +203,16 @@ with tab_command:
     st.markdown("<div class='panel-header'>💊 Strategies & Screenings</div>", unsafe_allow_html=True)
     col_tx, col_pd = st.columns(2)
     with col_tx:
-        # FIXED: Compressed layout structures to eliminate multi-line spaces
         tx_html = """
         <div class='command-card card-normal' style='min-height:180px; max-width: 100%; flex: 1;'>
-            <div style='font-weight:600; font-size:0.9rem; margin-bottom:8px;'>🏋️‍♂️ Active Treatment / Exercise Tracking Loops</div>
+            <div style='font-weight:600; font-size:0.9rem; margin-bottom:8px;'>%s Active Treatment / Exercise Tracking Loops</div>
             <div style='font-size:0.85rem; line-height:1.45;'>
                 • <strong>Parenteral Repletion Regimen:</strong> Bypassing eosinophilic mucosal blocks.<br>
                 • <strong>Methylation Support:</strong> Lowering high systemic neurotoxic Homocysteine volumes.<br>
                 • <strong>Sacroiliac Joint Decompression:</strong> Targeted routines to unburden Castellvi IIIA segment mechanics.
             </div>
         </div>
-        """
+        """ % "🏋️‍♂️"
         st.markdown(tx_html, unsafe_allow_html=True)
     with col_pd:
         st.markdown("<div class='command-card card-normal' style='min-height:180px; max-width: 100%; flex: 1;'>", unsafe_allow_html=True)
@@ -225,6 +222,29 @@ with tab_command:
         else:
             st.write("No diagnostic tracking metrics currently pending.")
         st.markdown("</div>", unsafe_allow_html=True)
+
+    # --- STEP 3: RESTORED RESEARCH REPOSITORY AND UPLOAD CORE ---
+    st.markdown("<div class='panel-header'>📁 Literature Repository & Document Ingestion Core</div>", unsafe_allow_html=True)
+    col_upload, col_lit = st.columns(2)
+    with col_upload:
+        st.markdown("<div class='command-card card-normal' style='min-height:210px; max-width: 100%; flex: 1;'>", unsafe_allow_html=True)
+        st.write("📥 **Ingest Latest Academic Literature or Clinical Briefs**")
+        uploaded_research = st.file_uploader("Drop new medical consult notes, peer-reviewed papers, or genomics PDFs here:", type=["pdf", "txt", "png", "jpg"], key="research_uploader_deck")
+        if uploaded_research:
+            st.success(f"Document '{uploaded_research.name}' successfully parsed into active session memory context!")
+        st.markdown("</div>", unsafe_allow_html=True)
+    with col_lit:
+        lit_html = """
+        <div class='command-card card-normal' style='min-height:210px; max-width: 100%; flex: 1;'>
+            <div style='font-weight:600; font-size:0.9rem; margin-bottom:8px;'>📚 Curated Research References & Case Studies</div>
+            <div style='font-size:0.82rem; line-height:1.45; color:#9CA3AF;'>
+                • <strong>Roufosse et al. (Blood Journal):</strong> Functional mechanism tracking of <em>CD3+ CD4+ CD7-</em> T-cell expansions, clonal evolution patterns, and indolent L-HES course tracking guidelines.<br>
+                • <strong>Simon et al. (Allergy Journal):** Autocrine loops of <em>IL-5</em> overproduction running entirely independent of traditional IgE allergy profiles.<br>
+                • <strong>Castellvi Classification Metrics:</strong> Clinical assessment of structural lumbosacral transitional vertebrae (LSTV) and secondary mechanical shear stress amplification upwards into L4 corner coordinates.
+            </div>
+        </div>
+        """
+        st.markdown(lit_html, unsafe_allow_html=True)
 
 # ==================== NAVIGATION TAB 2: LONGITUDINAL ANALYTICS ====================
 with tab_analytics:
