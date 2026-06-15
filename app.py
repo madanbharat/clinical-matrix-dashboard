@@ -124,7 +124,7 @@ with tab_command:
         st.markdown("</div>", unsafe_allow_html=True)
         
     with col_alerts:
-        st.markdown("<div class='panel-header' style='color:#EF4444;'>⚡ System Open Item Items</div>", unsafe_allow_html=True)
+        st.markdown("<div class='panel-header' style='color:#EF4444;'>⚡ System Open Items</div>", unsafe_allow_html=True)
         st.markdown("<div class='command-card' style='min-height: 230px; overflow-y: auto;'>", unsafe_allow_html=True)
         if not df_open.empty:
             for _, row in df_open.iterrows():
@@ -157,8 +157,10 @@ with tab_command:
     # Row 3: Therapeutic Interventions & Lab Pipeline
     st.markdown("<div class='panel-header'>💊 Therapeutic Frameworks & Diagnostic Pipelines</div>", unsafe_allow_html=True)
     col_tx, col_pd = st.columns(2)
-    with col_col_tx := col_tx:
-        st.markdown("<div class command-card class='command-card' style='min-height:220px;'>", unsafe_allow_html=True)
+    
+    # FIXED: Replaced invalid syntax with standard Streamlit context calls
+    with col_tx:
+        st.markdown("<div class='command-card' style='min-height:220px;'>", unsafe_allow_html=True)
         st.write("🏋️‍♂️ **Active Care Strategies & Exercises**")
         st.markdown("""
         - **Parenteral Repletion Regimen:** Bypassing underlying eosinophilic gastric mucosal absorption blocks.
@@ -166,7 +168,8 @@ with tab_command:
         - **Sacroiliac Joint Decompression Stretching:** Daily mobility target sequences structured to unburden the lower *Castellvi IIIA* segment mechanics.
         """)
         st.markdown("</div>", unsafe_allow_html=True)
-    with col_col_pd := col_pd:
+        
+    with col_pd:
         st.markdown("<div class='command-card' style='min-height:220px;'>", unsafe_allow_html=True)
         st.write("🔬 **Pending / Ordered Specialized Screenings (Dr. Domingues)**")
         if not df_pending.empty:
@@ -246,7 +249,7 @@ with tab_intelligence:
     st.write("This portal operates under a strict grounding rule. It references your active Excel data rows in real-time to eliminate diagnostic drift or hallucinations.")
 
     if not GEMINI_API_KEY:
-        st.warning("⚠️ Enter a valid Google Gemini API Key in your application deployment deployment secrets panel to activate the workspace.")
+        st.warning("⚠️ Enter a valid Google Gemini API Key in your application deployment secrets panel to activate the workspace.")
     else:
         genai.configure(api_key=GEMINI_API_KEY)
         
@@ -263,12 +266,12 @@ with tab_intelligence:
                 
                 system_primer = (
                     "MASTER SYSTEMIC CASE CONTEXT PROTOCOL INJECTION:\n\n"
-                    "You are accessing a high-fidelity clinical data hub. "
+                    "You are accessing a high-fidelity clinical repository control center. "
                     "Below are the verified metrics parsed directly from the user's active spreadsheet registry:\n\n"
                     f"--- SHEET: PATIENT OVERVIEW PROFILE ---\n{txt_summary}\n\n"
-                    f"--- SHEET: ACTIVE LAB REGISTRY INDICATORS ---\n{txt_registry}\n\n"
-                    f"--- SHEET: SYSTEMIC OPEN TASKS ---\n{txt_open}\n\n"
-                    "DIAGNOSTIC PATHOLOGY REFERENCE NETWORKS:\n"
+                    f"--- SHEET: ACTIVE LAB METRIC TRACKS ---\n{txt_registry}\n\n"
+                    f"--- SHEET: WORKSPACE OPEN TASKS ---\n{txt_open}\n\n"
+                    "DIAGNOSTIC PATHOLOGY ROADMAP:\n"
                     "- Patient exhibits a dual-track timeline: an indolent, pre-malignant 3.2% CD3+CD4+CD7- T-helper lymphocyte clone (L-HES signature) causing chronic tissue degranulation (ECP 48.4) and severe mucosal B12 malabsorption, intersecting with a seronegative Axial Spondyloarthritis (axSpA) track manifesting active bone edema and vertical L4 corner enthesitis. Structural lesions locate directly around a congenital lumbosacral Castellvi IIIA transitional fault.\n"
                     "- Onset was anchored via historical chronic Fasciola hepatica parasite stress (cleared in 2014) which selected for the legacy clone, while eradication triggered an explosive Th17 inflammatory rebound line along spinal mechanics.\n"
                     "- An early youth terminal lymphoma blast crisis in a first cousin (age 18-20) confirms a 12.5% shared genetic vulnerability cluster requiring long-term hematological tracking vigilance.\n\n"
