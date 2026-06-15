@@ -22,11 +22,11 @@ st.markdown("""
     .critical-bg { background-color:#FFE3E3; color:#D9383A; }
     .stable-bg { background-color:#E3FBE3; color:#247A24; }
 </style>
-""", unsafe_with_html=True)
+""", unsafe_allow_html=True)
 
 # Main Title Grid
-st.markdown("<div class='main-header'>🧬 Case Matrix Ecosystem</div>", unsafe_with_html=True)
-st.markdown("<div class='sub-header'>Systemic Multi-Engine Research, Mapping, & Clinical Intel Control Panel</div>", unsafe_with_html=True)
+st.markdown("<div class='main-header'>🧬 Case Matrix Ecosystem</div>", unsafe_allow_html=True)
+st.markdown("<div class='sub-header'>Systemic Multi-Engine Research, Mapping, & Clinical Intel Control Panel</div>", unsafe_allow_html=True)
 st.markdown("---")
 
 # Layout Matrix Configuration
@@ -51,13 +51,13 @@ with col_left:
     # 4-Column Metric Grid System
     m1, m2, m3, m4 = st.columns(4)
     with m1:
-        st.markdown("<div class='card'><span class='metric-lbl'>Vitamin B12</span><br><span class='metric-value'>177</span><br><span class='status-alert critical-bg'>Deficient</span></div>", unsafe_with_html=True)
+        st.markdown("<div class='card'><span class='metric-lbl'>Vitamin B12</span><br><span class='metric-value'>177</span><br><span class='status-alert critical-bg'>Deficient</span></div>", unsafe_allow_html=True)
     with m2:
-        st.markdown("<div class='card'><span class='metric-lbl'>Homocysteine</span><br><span class='metric-value'>20.7</span><br><span class='status-alert critical-bg'>High Risk</span></div>", unsafe_with_html=True)
+        st.markdown("<div class='card'><span class='metric-lbl'>Homocysteine</span><br><span class='metric-value'>20.7</span><br><span class='status-alert critical-bg'>High Risk</span></div>", unsafe_allow_html=True)
     with m3:
-        st.markdown("<div class='card'><span class='metric-lbl'>ECP Level</span><br><span class='metric-value'>48.4</span><br><span class='status-alert critical-bg'>Degranulating</span></div>", unsafe_with_html=True)
+        st.markdown("<div class='card'><span class='metric-lbl'>ECP Level</span><br><span class='metric-value'>48.4</span><br><span class='status-alert critical-bg'>Degranulating</span></div>", unsafe_allow_html=True)
     with m4:
-        st.markdown("<div class='card'><span class='metric-lbl'>CD4+CD7- Subset</span><br><span class='metric-value'>3.2%</span><br><span class='status-alert critical-bg'>Clonal Suspect</span></div>", unsafe_with_html=True)
+        st.markdown("<div class='card'><span class='metric-lbl'>CD4+CD7- Subset</span><br><span class='metric-value'>3.2%</span><br><span class='status-alert critical-bg'>Clonal Suspect</span></div>", unsafe_allow_html=True)
 
     # Historical Sequence Track
     st.subheader("⏱️ Chronological Hit Timeline")
