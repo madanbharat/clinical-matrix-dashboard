@@ -100,22 +100,61 @@ if not GEMINI_API_KEY:
 else:
     genai.configure(api_key=GEMINI_API_KEY)
     
-    # Cache system memory loops to maintain consistent case parameters
-    if "chat_history" not in st.session_state:
+    # Force re-initialization if the session is missing, old, or manually reset
+    if "gemini_chat" not in st.session_state or st.sidebar.button("🔄 Reset Chat Session"):
         st.session_state.chat_history = []
-        # Pre-load complete case context directly into Gemini's active memory pool
-        model = genai.GenerativeModel("gemini-2.5-flash")
-        st.session_state.gemini_chat = model.start_chat(history=[])
-        
-        system_primer = (
-            "You are an expert clinical data scientist analyzing a complex case. "
-            "Context: The patient has a 3.2% CD3+CD4+CD7- T-cell population, high ECP (48.4 µg/L), "
-            "severe B12 deficiency (177 pg/mL), elevated Homocysteine (20.7 µmol/L), "
-            "seronegative axSpA with an active L4 Romanus lesion, a congenital Castellvi IIIA transitional segment, "
-            "and a history of chronic Fasciola hepatica treated in 2014. "
-            "Address all research inquiries with clinical precision, focusing on cross-system mechanisms."
-        )
-        st.session_state.gemini_chat.send_message(system_primer)
+        try:
+            model = genai.GenerativeModel("gemini-2.5-flash")
+            st.session_state.gemini_chat = model.start_chat(history=[])
+            
+            # THE COMPLETE CLINICAL KNOWLEDGE ENGINE INJECTION BLOCK
+            system_primer = (
+                "MASTER CLINICAL CASE CONTEXT DATA PROTOCOL:\n\n"
+                "1. PATIENT DEMOGRAPHICS & BACKGROUND:\n"
+                "- Profile: 42-year-old male with a 14-year, highly fragmented systemic presentation.\n"
+                "- Core Primary Symptoms: Intense, chronic nocturnal pruritus (skin itching), urticarial bleeding lesions, "
+                "chronic abdominal pain, fluctuating inflammatory fatigue, and ocular redness flares.\n\n"
+                "2. PRIMARY ENVIRONMENTAL TRIGGER:\n"
+                "- History: Documented multi-year infection with Fasciola hepatica (liver fluke) contracted prior to 2012.\n"
+                "- Treatment: Cleared with triclabendazole in 2014.\n"
+                "- Pathophysiology: The prolonged presence of the fluke forced an extreme systemic Th2 shift, overproducing IL-5. "
+                "The removal of the fluke in 2014 caused an intense immunological rebound effect (Th17 pathway activation).\n\n"
+                "3. CELLULAR DISCOVERY (FLOW CYTOMETRY - JUNE 1, 2026):\n"
+                "- Lymphocyte Count: Normal (1.905 G/L). T-cells, B-cells, and NK-cells are baseline.\n"
+                "- CD4/CD8 Ratio: Low/Abnormal at 1.14 (Reference 1.30 - 2.50).\n"
+                "- Critical Finding: Commentary notes an explicit 3.2% CD3+ CD4+ CD7- T-helper lymphocyte population.\n"
+                "- Interpretation: Highly suggestive of Lymphocyte-Variant Hypereosinophilic Syndrome (L-HES). This rogue 3.2% "
+                "population lacks the CD7 marker, acting as a permanent cytokine factory for IL-5, independent of allergies.\n\n"
+                "4. DYSREGULATED IMMUNOLOGICAL GAUGE TRAFFIC:\n"
+                "- Eosinophil Cationic Protein (ECP): 48.4 µg/L (Severe tissue degranulation/fibroblast risk).\n"
+                "- Blood Eosinophils: Mildly elevated at 0.62 G/L.\n"
+                "- Skin Biopsy: Positive tissue eosinophilic infiltration.\n"
+                "- Safety Exclusions: Total IgE normal (31 kUA/L), Tryptase normal (5.0 ng/mL). Rules out standard allergies and mastocytosis.\n\n"
+                "5. SKELETAL & BIOMECHANICAL TRAJECTORY (axSpA):\n"
+                "- Diagnosis: Documented Seronegative Axial Spondyloarthritis.\n"
+                "- Radiographical Progression (March 24, 2026 MRI): Active 8x4 mm bone marrow edema focus on the Left SI joint "
+                "paired with a brand new anterior Romanus lesion on the L4 vertebral corner.\n"
+                "- Structural Fault: Congenital Castellvi IIIA lumbosacral transitional vertebra (L5 fused to sacrum). "
+                "This layout locks the base of the spine, diverting severe mechanical shear force upward into L4-5, which pulls "
+                "systemic axSpA inflammation directly to these coordinates, driving severe radiculopathy pain.\n\n"
+                "6. METABOLIC & OSMOREGULATORY BREAKDOWN:\n"
+                "- Methylation Index: Severe Vitamin B12 deficiency (177 pg/mL) due to mucosal gut malabsorption from chronic eosinophil recruitment. "
+                "This results in a toxic secondary accumulation of Homocysteine (20.7 µmol/L) which strips myelin coating off nerve roots.\n"
+                "- Fluid Clearance Volume: Clearing ~4 Liters of ultra-dilute daily urine locked at a Specific Gravity of 1.003.\n\n"
+                "7. FAMILIAL ONCOLOGICAL RISK VECTOR:\n"
+                "- Genetic History: First cousin developed an aggressive, terminal lymphoma blast crisis in early youth (age 18-20).\n"
+                "- Risk Profile: Points to a shared 12.5% genetic pool with inherited vulnerabilities to immune dysregulation or "
+                "lymphoproliferative smoldering. The 3.2% CD4+CD7- population must be treated as an indolent clone requiring long-term tracking.\n\n"
+                "8. THERAPEUTIC EXPERIENCE HISTORY:\n"
+                "- Failures: Complete lack of control on anti-TNF (Humira) and anti-IL-17A (Cosentyx, Bimzelx).\n"
+                "- JAK Paradox: Strong initial structural/pain relief on JAK inhibitors (Rinvoq, Jyseleca), proving the clone communicates via "
+                "JAK-STAT channels. However, treatment failed due to repeated, severe infection cycles and psychiatric crashes.\n\n"
+                "INSTRUCTIONS FOR ANALYSIS: Address all queries with advanced, cross-disciplinary clinical research mechanics. Connect the "
+                "environmental parasite history, the genetic vulnerabilities, and the 3.2% aberrant T-cell line to explain all symptoms logically."
+            )
+            st.session_state.gemini_chat.send_message(system_primer)
+        except Exception as e:
+            st.error(f"Failed to initialize clean chat model: {e}")
 
     # Render previous conversation lines
     for message in st.session_state.chat_history:
@@ -123,13 +162,16 @@ else:
             st.markdown(message["content"])
 
     # Handle incoming user queries
-    if user_query := st.chat_input("Ask a clinical question (e.g., 'Explain the link between the fluke history and the current spinal lesions'):"):
+    if user_query := st.chat_input("Ask a clinical question (e.g., 'What is the exact multi-hit connection between the fluke and my spine?'):"):
         with st.chat_message("user"):
             st.markdown(user_query)
         st.session_state.chat_history.append({"role": "user", "content": user_query})
         
         with st.chat_message("assistant"):
-            with st.spinner("Analyzing intersecting variables..."):
-                ai_response = st.session_state.gemini_chat.send_message(user_query)
-                st.markdown(ai_response.text)
-        st.session_state.chat_history.append({"role": "assistant", "content": ai_response.text})
+            with st.spinner("Anatomizing data tracks..."):
+                try:
+                    ai_response = st.session_state.gemini_chat.send_message(user_query)
+                    st.markdown(ai_response.text)
+                    st.session_state.chat_history.append({"role": "assistant", "content": ai_response.text})
+                except Exception as e:
+                    st.error(f"The background session encountered a memory conflict. Please click 'Reset Chat Session' in your sidebar to wipe the stale cache and reload. Error details: {e}")
