@@ -18,7 +18,7 @@ st.markdown("""
     
     /* Core Layout Foundations */
     html, body, [data-testid="stAppViewContainer"], [data-testid="stHeader"] {
-        background-color: #030712 !important;
+        background-color: #040714 !important;
         color: #F3F4F6 !important;
         font-family: 'Plus Jakarta Sans', sans-serif !important;
     }
@@ -28,49 +28,52 @@ st.markdown("""
     .cockpit-subtitle { font-size: 0.85rem; color: #00F2FE; font-weight: 600; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 25px; }
     .panel-header { font-size: 1rem; font-weight: 700; color: #FFFFFF; text-transform: uppercase; letter-spacing: 1px; margin-top: 20px; margin-bottom: 15px; }
     
-    /* PURE CSS FLEXBOX GRID ARCHITECTURE - FIXES GHOST RECTANGLES */
+    /* Pure CSS Flexbox Responsive Grid Matrix */
     .cockpit-flex-grid {
         display: flex;
         flex-wrap: wrap;
-        gap: 14px;
+        gap: 12px;
         width: 100%;
     }
     
-    /* Compact Instruments Matrix Cards */
+    /* Reduced Sizing Card Framework */
     .command-card {
-        flex: 1 1 calc(25% - 14px);
-        min-width: 280px;
-        max-width: calc(25% - 14px);
+        flex: 1 1 calc(25% - 12px);
+        min-width: 270px;
+        max-width: calc(25% - 12px);
         background: linear-gradient(135deg, rgba(15, 23, 42, 0.8) 0%, rgba(30, 41, 59, 0.4) 100%);
-        border: 1px solid rgba(255, 255, 255, 0.06);
-        border-radius: 12px;
-        padding: 16px;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 10px;
+        padding: 14px;
         box-sizing: border-box;
         display: flex;
         flex-direction: column;
         justify-content: space-between;
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
-        transition: border 0.3s ease;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
     }
-    .command-card:hover { border: 1px solid rgba(0, 242, 254, 0.25); }
-    .card-crit { border-top: 3px solid #EF4444 !important; background: linear-gradient(135deg, rgba(30, 10, 18, 0.7) 0%, rgba(15, 23, 42, 0.4) 100%); }
-    .card-normal { border-top: 3px solid #00F2FE !important; }
     
-    /* Condensed Typography Layout */
-    .metric-label { font-size: 0.72rem; text-transform: uppercase; color: #9CA3AF; font-weight: 600; letter-spacing: 0.3px; line-height: 1.35; margin-bottom: 6px; }
-    .metric-val { font-size: 1.65rem; font-weight: 700; color: #FFFFFF; font-family: 'JetBrains Mono', monospace; }
+    /* Strict Variable-Driven Border Colors */
+    .card-crit { border-top: 3px solid #FF3366 !important; background: linear-gradient(135deg, rgba(38, 12, 21, 0.7) 0%, rgba(15, 23, 42, 0.4) 100%); }
+    .card-normal { border-top: 3px solid #00F2FE !important; background: linear-gradient(135deg, rgba(12, 28, 50, 0.6) 0%, rgba(15, 23, 42, 0.4) 100%); }
+    
+    /* Card Component Layouts */
+    .card-top-row { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; }
+    .card-date-badge { font-family: 'JetBrains Mono', monospace; font-size: 0.68rem; color: #8A99AD; background: rgba(255,255,255,0.04); padding: 2px 6px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.04); }
+    
+    .metric-label { font-size: 0.74rem; text-transform: uppercase; color: #E5E7EB; font-weight: 600; letter-spacing: 0.3px; line-height: 1.3; padding-right: 5px; }
+    .metric-val { font-size: 1.5rem; font-weight: 700; color: #FFFFFF; font-family: 'JetBrains Mono', monospace; margin-top: 4px; }
     .metric-unit { font-size: 0.78rem; color: #00F2FE; font-weight: 500; margin-left: 2px; }
-    .metric-desc { font-size: 0.74rem; color: #9CA3AF; margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.06); line-height: 1.4; text-align: justify; }
+    .metric-desc { font-size: 0.72rem; color: #9CA3AF; margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.06); line-height: 1.35; text-align: justify; }
     
-    /* Status Badges */
-    .alert-badge { padding: 3px 8px; border-radius: 6px; font-size: 0.62rem; font-weight: 700; display: inline-block; margin-top: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
-    .badge-critical { background-color: rgba(239, 68, 68, 0.12); color: #F87171; border: 1px solid rgba(239, 68, 68, 0.25); }
+    /* Micro Status Badges */
+    .alert-badge { padding: 2px 6px; border-radius: 4px; font-size: 0.6rem; font-weight: 700; display: inline-block; text-transform: uppercase; margin-top: 6px; letter-spacing: 0.5px; }
+    .badge-critical { background-color: rgba(255, 51, 102, 0.12); color: #FF4D7D; border: 1px solid rgba(255, 51, 102, 0.25); }
     .badge-baseline { background-color: rgba(0, 242, 254, 0.1); color: #00F2FE; border: 1px solid rgba(0, 242, 254, 0.2); }
     
-    /* Mobile/Responsive scaling rules */
-    @media (max-width: 1200px) { .command-card { flex: 1 1 calc(33.33% - 14px); max-width: calc(33.33% - 14px); } }
-    @media (max-width: 900px) { .command-card { flex: 1 1 calc(50% - 14px); max-width: calc(50% - 14px); } }
-    @media (max-width: 600px) { .command-card { flex: 1 1 100%; max-width: 100%; } }
+    /* Responsive Adaptations */
+    @media (max-width: 1400px) { .command-card { flex: 1 1 calc(33.33% - 12px); max-width: calc(33.33% - 12px); } }
+    @media (max-width: 1000px) { .command-card { flex: 1 1 calc(50% - 12px); max-width: calc(50% - 12px); } }
+    @media (max-width: 650px) { .command-card { flex: 1 1 100%; max-width: 100%; } }
 </style>
 """, unsafe_allow_html=True)
 
@@ -126,7 +129,7 @@ with tab_command:
     
     with col_profile:
         st.markdown("<div class='panel-header'>📋 Executive Patient Profile Summary</div>", unsafe_allow_html=True)
-        st.markdown("<div class='command-card' style='min-height: 210px; max-width: 100%; flex: 1;'>", unsafe_allow_html=True)
+        st.markdown("<div class='command-card card-normal' style='min-height: 210px; max-width: 100%; flex: 1;'>", unsafe_allow_html=True)
         if not df_summary.empty:
             for idx, row in df_summary.dropna(subset=[df_summary.columns[0], df_summary.columns[1]], how='any').iterrows():
                 lbl = str(row.iloc[0]).strip()
@@ -144,42 +147,61 @@ with tab_command:
                 st.markdown(f"<div style='padding: 4px 8px; background: rgba(239,68,68,0.06); border-left: 3px solid #EF4444; border-radius:4px; margin-bottom:6px; font-size:0.8rem; color:#F3F4F6;'>{row[col_target_issue]}</div>", unsafe_allow_html=True)
         st.markdown("</div>", unsafe_allow_html=True)
 
-    # --- THE COMPACT COCKPIT INSTRUMENT GRID PANEL ---
-    st.markdown("<div class='panel-header'>🚨 Flagged System Anomalies & Laboratory Exceptions</div>", unsafe_allow_html=True)
+    # --- PERSPECTIVE CONTROL SWITCHER BOARD ---
+    st.markdown("<div class='panel-header'>🎛️ Instrument Panel Console Viewport</div>", unsafe_allow_html=True)
+    console_view = st.radio(
+        "Select Target Data Stream Perspective:",
+        ["🔴 Show Out-of-Range Anomalies Only", "🟢 Show Normal Control Baselines Only", "📋 Show Complete Operational Registry"],
+        horizontal=True
+    )
+
     if not df_registry.empty and "Flag / Status" in df_registry.columns:
+        # Sift parameters dynamically using localized condition queries
+        if "Anomalies" in console_view:
+            df_filtered = df_registry[df_registry["Flag / Status"].str.contains("High|Low|Abnormal|Critical|Severe|Elevated|Missing|Anomaly", na=False, case=False)]
+        elif "Normal" in console_view:
+            df_filtered = df_registry[df_registry["Flag / Status"].str.contains("Normal|Negative|Confirmed|Reassuring|Historical", na=False, case=False)]
+        else:
+            df_filtered = df_registry
+            
+        df_display = df_filtered.dropna(subset=['Value'])
         
-        # Isolate out-of-range indicators from spreadsheet rows
-        df_anomalies = df_registry[df_registry["Flag / Status"].str.contains("High|Low|Abnormal|Critical|Severe|Elevated|Missing|Anomaly", na=False, case=False)].dropna(subset=['Value'])
-        
-        if not df_anomalies.empty:
-            # Build the pure HTML container block string
+        if not df_display.empty:
             grid_html = "<div class='cockpit-flex-grid'>"
             
-            for _, row in df_anomalies.iterrows():
-                ctx_flag = str(row['Flag / Status']).strip()
-                unit = str(row['Unit']).strip() if (pd.notna(row['Unit']) and str(row['Unit']).lower() != 'nan') else ''
-                desc = str(row['Clinical Context / Interpretation (careful)']).strip() if pd.notna(row['Clinical Context / Interpretation (careful)']) else ''
+            for _, row in df_display.iterrows():
+                status_raw = str(row['Flag / Status']).strip()
                 
-                # Append card layouts into the string core
+                # Dynamic Class Evaluator - Solves the blanket red coloring flaw
+                is_anomaly = any(x in status_raw.lower() for x in ["high", "low", "abnormal", "critical", "severe", "elevated", "missing", "anomaly"])
+                card_class = "card-crit" if is_anomaly else "card-normal"
+                badge_class = "badge-critical" if is_anomaly else "badge-baseline"
+                
+                unit_label = str(row['Unit']).strip() if (pd.notna(row['Unit']) and str(row['Unit']).lower() != 'nan') else ''
+                date_label = str(row['Date / Timeline']).strip() if pd.notna(row['Date / Timeline']) else 'No Date'
+                desc_label = str(row['Clinical Context / Interpretation (careful)']).strip() if pd.notna(row['Clinical Context / Interpretation (careful)']) else ''
+                
+                # Append structures cleanly with explicit date-stamps exposed
                 grid_html += f"""
-                <div class='command-card card-crit'>
+                <div class='command-card {card_class}'>
                     <div>
-                        <div class='metric-label'>{row['Marker / Clinical Event']}</div>
-                        <div class='metric-val'>{row['Value']}<span class='metric-unit'> {unit}</span></div>
-                        <div class='alert-badge badge-critical'>{ctx_flag}</div>
+                        <div class='card-top-row'>
+                            <div class='metric-label'>{row['Marker / Clinical Event']}</div>
+                            <div class='card-date-badge'>🗓️ {date_label}</div>
+                        </div>
+                        <div class='metric-val'>{row['Value']}<span class='metric-unit'> {unit_label}</span></div>
+                        <div class='alert-badge {badge_class}'>{status_raw}</div>
                     </div>
                 """
-                if desc and desc.lower() != 'nan' and desc != '':
-                    grid_html += f"<div class='metric-desc'>{desc}</div>"
+                if desc_label and desc_label.lower() != 'nan' and desc_label != '':
+                    grid_html += f"<div class='metric-desc'>{desc_label}</div>"
                 
                 grid_html += "</div>"
                 
             grid_html += "</div>"
-            
-            # Direct single execution pipeline call to Streamlit rendering engine
             st.markdown(grid_html, unsafe_allow_html=True)
         else:
-            st.success("All system biological biomarkers currently verified inside baseline control metrics.")
+            st.info("No rows match the selected filter perspective inside the active registry sheets.")
 
     # Row 3: Therapeutic Frameworks & Diagnostics
     st.markdown("<div class='panel-header'>💊 Strategies & Screenings</div>", unsafe_allow_html=True)
@@ -233,7 +255,7 @@ with tab_analytics:
 with tab_database:
     st.markdown("### Live Database Core Editor")
     if not df_registry.empty:
-        edited_df = st.data_editor(df_registry, use_container_width=True, num_rows="dynamic", key="editor_widget_final_v5")
+        edited_df = st.data_editor(df_registry, use_container_width=True, num_rows="dynamic", key="editor_widget_final_v6")
         if st.button("⚡ Save Spreadsheet Updates & Sync Engine"):
             st.session_state['df_registry'] = edited_df
             if "gemini_chat" in st.session_state:
