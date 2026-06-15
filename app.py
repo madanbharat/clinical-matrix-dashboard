@@ -128,11 +128,10 @@ with tab_command:
                 st.markdown(f"<div style='padding: 4px 8px; background: rgba(255,51,102,0.06); border-left: 3px solid #FF3366; border-radius:4px; margin-bottom:6px; font-size:0.8rem; color:#F3F4F6;'>{row[col_target_issue]}</div>", unsafe_allow_html=True)
         st.markdown("</div>", unsafe_allow_html=True)
 
-    # RE-DESIGNED INSTRUMENT COMPACT GRID SYSTEM
     st.markdown("<div class='panel-header'>🚨 System Instrument Panel & Metric Gauges</div>", unsafe_allow_html=True)
     if not df_registry.empty and "Flag / Status" in df_registry.columns:
         
-        # FIXED: Created columns OUTSIDE the loop to permanently eliminate empty rectangular gaps
+        # Grid array layout allocation outside loop
         anomaly_cols = st.columns(4)
         
         for idx, (_, row) in enumerate(df_registry.dropna(subset=['Value']).reset_index().iterrows()):
@@ -147,19 +146,22 @@ with tab_command:
             unit = row['Unit'] if pd.notna(row['Unit']) else ''
             desc = str(row['Clinical Context / Interpretation (careful)']).strip() if pd.notna(row['Clinical Context / Interpretation (careful)']) else ''
             
+            # --- FIXED: WE STRING-BUILD EVERYTHING INTO ONE SINGLE BLOCK TO KILL GHOST BOXES ---
+            card_html = f"""
+            <div class='command-card {card_style}'>
+                <div class='metric-label'>{row['Marker / Clinical Event']}</div>
+                <div class='metric-val'>{row['Value']}<span class='metric-unit'> {unit}</span></div>
+                <div class='alert-badge {badge_style}'>{ctx_flag}</div>
+            """
+            
+            if desc and desc.lower() != 'nan' and desc != '':
+                card_html += f"<div class='metric-desc'>{desc}</div>"
+                
+            card_html += "</div>"
+            
+            # Deliver to Streamlit within a single structural footprint call
             with target_col:
-                st.markdown(f"""
-                <div class='command-card {card_style}'>
-                    <div class='metric-label'>{row['Marker / Clinical Event']}</div>
-                    <div class='metric-val'>{row['Value']}<span class='metric-unit'> {unit}</span></div>
-                    <div class='alert-badge {badge_style}'>{ctx_flag}</div>
-                """, unsafe_allow_html=True)
-                
-                # FIXED: Description field renders conditionally to remove empty whitespace
-                if desc and desc.lower() != 'nan' and desc != '':
-                    st.markdown(f"<div class='metric-desc'>{desc}</div>", unsafe_allow_html=True)
-                
-                st.markdown("</div>", unsafe_allow_html=True)
+                st.markdown(card_html, unsafe_allow_html=True)
 
     # Row 3: Therapeutic Frameworks & Diagnostics
     st.markdown("<div class='panel-header'>💊 Strategies & Screenings</div>", unsafe_allow_html=True)
@@ -213,7 +215,7 @@ with tab_analytics:
 with tab_database:
     st.markdown("### Live Database Core Editor")
     if not df_registry.empty:
-        edited_df = st.data_editor(df_registry, use_container_width=True, num_rows="dynamic", key="editor_widget_final_v2")
+        edited_df = st.data_editor(df_registry, use_container_width=True, num_rows="dynamic", key="editor_widget_final_v3")
         if st.button("⚡ Save Spreadsheet Updates & Sync Engine"):
             st.session_state['df_registry'] = edited_df
             if "gemini_chat" in st.session_state:
