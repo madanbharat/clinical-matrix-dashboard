@@ -173,5 +173,6 @@ else:
                     ai_response = st.session_state.gemini_chat.send_message(user_query)
                     st.markdown(ai_response.text)
                     st.session_state.chat_history.append({"role": "assistant", "content": ai_response.text})
+                    "STRICT GROUNDING RULE: You must treat the provided data points as absolute, unalterable facts. If the user asks a question that contradicts these numbers, or asks you to speculate on a diagnosis completely unsupported by this text or peer-reviewed literature, you must state that you do not have the data to support that conclusion. Do not invent or alter any clinical metrics."
                 except Exception as e:
                     st.error(f"The background session encountered a memory conflict. Please click 'Reset Chat Session' in your sidebar to wipe the stale cache and reload. Error details: {e}")
