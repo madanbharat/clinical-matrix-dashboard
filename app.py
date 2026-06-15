@@ -128,40 +128,38 @@ with tab_command:
                 st.markdown(f"<div style='padding: 4px 8px; background: rgba(255,51,102,0.06); border-left: 3px solid #FF3366; border-radius:4px; margin-bottom:6px; font-size:0.8rem; color:#F3F4F6;'>{row[col_target_issue]}</div>", unsafe_allow_html=True)
         st.markdown("</div>", unsafe_allow_html=True)
 
-    st.markdown("<div class='panel-header'>🚨 System Instrument Panel & Metric Gauges</div>", unsafe_allow_html=True)
+    # --- THE FIXED HORIZONTAL FLEX GRID PATTERN ---
+    st.markdown("<div class='panel-header'>🚨 Flagged System Anomalies & Laboratory Exceptions</div>", unsafe_allow_html=True)
     if not df_registry.empty and "Flag / Status" in df_registry.columns:
         
-        # Grid array layout allocation outside loop
-        anomaly_cols = st.columns(4)
+        # 1. Isolate row markers that match out-of-range parameters
+        df_anomalies = df_registry[df_registry["Flag / Status"].str.contains("High|Low|Abnormal|Critical|Severe|Elevated|Missing|Anomaly", na=False, case=False)].dropna(subset=['Value']).reset_index()
         
-        for idx, (_, row) in enumerate(df_registry.dropna(subset=['Value']).reset_index().iterrows()):
-            target_col = anomaly_cols[idx % 4]
-            
-            ctx_flag = str(row['Flag / Status']).strip()
-            is_bad = any(x in ctx_flag.lower() for x in ["high", "low", "abnormal", "critical", "severe", "elevated", "missing", "anomaly"])
-            
-            card_style = "card-crit" if is_bad else "card-normal"
-            badge_style = "badge-critical" if is_bad else "badge-baseline"
-            
-            unit = row['Unit'] if pd.notna(row['Unit']) else ''
-            desc = str(row['Clinical Context / Interpretation (careful)']).strip() if pd.notna(row['Clinical Context / Interpretation (careful)']) else ''
-            
-            # --- FIXED: WE STRING-BUILD EVERYTHING INTO ONE SINGLE BLOCK TO KILL GHOST BOXES ---
-            card_html = f"""
-            <div class='command-card {card_style}'>
-                <div class='metric-label'>{row['Marker / Clinical Event']}</div>
-                <div class='metric-val'>{row['Value']}<span class='metric-unit'> {unit}</span></div>
-                <div class='alert-badge {badge_style}'>{ctx_flag}</div>
-            """
-            
-            if desc and desc.lower() != 'nan' and desc != '':
-                card_html += f"<div class='metric-desc'>{desc}</div>"
+        if not df_anomalies.empty:
+            # i steps through the array in fixed jumps of 4 items at a time
+            for i in range(0, len(df_anomalies), 4):
+                chunk = df_anomalies.iloc[i:i+4]
+                row_columns = st.columns(4) # Force opens a clean horizontal grid row
                 
-            card_html += "</div>"
-            
-            # Deliver to Streamlit within a single structural footprint call
-            with target_col:
-                st.markdown(card_html, unsafe_allow_html=True)
+                for idx, (_, row) in enumerate(chunk.iterrows()):
+                    ctx_flag = str(row['Flag / Status']).strip()
+                    unit = row['Unit'] if pd.notna(row['Unit']) else ''
+                    desc = str(row['Clinical Context / Interpretation (careful)']).strip() if pd.notna(row['Clinical Context / Interpretation (careful)']) else ''
+                    
+                    card_html = f"""
+                    <div class='command-card card-crit'>
+                        <div class='metric-label'>{row['Marker / Clinical Event']}</div>
+                        <div class='metric-val'>{row['Value']}<span class='metric-unit'> {unit}</span></div>
+                        <div class='alert-badge badge-critical'>{ctx_flag}</div>
+                    """
+                    if desc and desc.lower() != 'nan' and desc != '':
+                        card_html += f"<div class='metric-desc'>{desc}</div>"
+                    card_html += "</div>"
+                    
+                    with row_columns[idx]:
+                        st.markdown(card_html, unsafe_allow_html=True)
+        else:
+            st.success("All system biological biomarkers currently verified inside baseline control metrics.")
 
     # Row 3: Therapeutic Frameworks & Diagnostics
     st.markdown("<div class='panel-header'>💊 Strategies & Screenings</div>", unsafe_allow_html=True)
@@ -215,7 +213,7 @@ with tab_analytics:
 with tab_database:
     st.markdown("### Live Database Core Editor")
     if not df_registry.empty:
-        edited_df = st.data_editor(df_registry, use_container_width=True, num_rows="dynamic", key="editor_widget_final_v3")
+        edited_df = st.data_editor(df_registry, use_container_width=True, num_rows="dynamic", key="editor_widget_final_v4")
         if st.button("⚡ Save Spreadsheet Updates & Sync Engine"):
             st.session_state['df_registry'] = edited_df
             if "gemini_chat" in st.session_state:
