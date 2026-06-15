@@ -28,7 +28,7 @@ st.markdown("""
     .cockpit-subtitle { font-size: 0.85rem; color: #00F2FE; font-weight: 600; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 25px; }
     .panel-header { font-size: 1rem; font-weight: 700; color: #FFFFFF; text-transform: uppercase; letter-spacing: 1px; margin-top: 22px; margin-bottom: 12px; }
     
-    /* UNIFIED HORIZONTAL STRUCTURAL PANEL ROW */
+    /* Unified Horizontal Structural Row Container */
     .panel-row-container {
         display: flex;
         gap: 14px;
@@ -49,9 +49,18 @@ st.markdown("""
     }
     .panel-left-heavy { flex: 2; min-width: 320px; border-top: 3px solid #00F2FE; }
     .panel-right-light { flex: 1; min-width: 280px; border-top: 3px solid #FF3366; }
-    .panel-title-text { font-size: 0.95rem; font-weight: 700; uppercase; letter-spacing: 0.5px; margin-bottom: 15px; color: #FFFFFF; }
+    .panel-title-text { font-size: 0.95rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 15px; color: #FFFFFF; }
     
-    /* Pure CSS Flexbox Instrument Grid Matrix */
+    /* GLOBAL SKINNING TARGETS FOR INTERACTIVE WIDGETS - ELIMINATES EMPTY GHOST BOXES */
+    [data-testid="stFileUploader"], [data-testid="stDataFrame"] {
+        background: linear-gradient(135deg, rgba(15, 23, 42, 0.6) 0%, rgba(30, 41, 59, 0.4) 100%) !important;
+        border: 1px solid rgba(255, 255, 255, 0.06) !important;
+        border-radius: 12px !important;
+        padding: 16px !important;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3) !important;
+    }
+    
+    /* Pure CSS Flexbox Responsive Instrument Grid Matrix */
     .cockpit-flex-grid {
         display: flex;
         flex-wrap: wrap;
@@ -145,35 +154,29 @@ tab_command, tab_analytics, tab_database, tab_intelligence = st.tabs([
 
 # ==================== NAVIGATION TAB 1: STRATEGIC COMMAND DECK ====================
 with tab_command:
+    col_profile, col_alerts = st.columns([2, 1])
     
-    # --- FIXED: UNIFIED PROFILE & ACTIONS PANEL TO ELIMINATE THE VERTICAL WHITE RESIDUE GAPS ---
-    profile_content_string = ""
-    if not df_summary.empty:
-        for idx, row in df_summary.dropna(subset=[df_summary.columns[0], df_summary.columns[1]], how='any').iterrows():
-            lbl = str(row.iloc[0]).strip()
-            val = str(row.iloc[1]).strip()
-            if any(x in lbl.lower() for x in ["rows", "priority", "result", "question", "imaging"]):
-                profile_content_string += f"<div style='margin-bottom:8px; font-size:0.85rem;'><strong style='color:#00F2FE;'>{lbl}:</strong> <span style='color:#E5E7EB;'>{val}</span></div>"
-
-    gaps_content_string = ""
-    if not df_open.empty:
-        col_target_issue = 'Issue' if 'Issue' in df_open.columns else df_open.columns[2]
-        for _, row in df_open.iterrows():
-            gaps_content_string += f"<div style='padding: 5px 8px; background: rgba(255,51,102,0.05); border-left: 3px solid #FF3366; border-radius:4px; margin-bottom:6px; font-size:0.8rem; color:#F3F4F6;'>{row[col_target_issue]}</div>"
-
-    unified_header_row_html = f"""
-    <div class='panel-row-container'>
-        <div class='dashboard-panel panel-left-heavy'>
-            <div class='panel-title-text'>📋 Executive Patient Profile Summary</div>
-            {profile_content_string}
-        </div>
-        <div class='dashboard-panel panel-right-light' style='max-height: 232px; overflow-y: auto;'>
-            <div class='panel-title-text' style='color:#FF3366;'>⚡ Priority Action Gaps</div>
-            {gaps_content_string}
-        </div>
-    </div>
-    """
-    st.markdown(unified_header_row_html, unsafe_allow_html=True)
+    with col_profile:
+        st.markdown("<div class='panel-header'>📋 Executive Patient Profile Summary</div>", unsafe_allow_html=True)
+        profile_html = "<div class='dashboard-panel panel-left-heavy' style='min-height: 210px;'>"
+        if not df_summary.empty:
+            for idx, row in df_summary.dropna(subset=[df_summary.columns[0], df_summary.columns[1]], how='any').iterrows():
+                lbl = str(row.iloc[0]).strip()
+                val = str(row.iloc[1]).strip()
+                if any(x in lbl.lower() for x in ["rows", "priority", "result", "question", "imaging"]):
+                    profile_html += f"<div style='margin-bottom:6px; font-size:0.85rem;'><strong style='color:#00F2FE;'>{lbl}:</strong> <span style='color:#E5E7EB;'>{val}</span></div>"
+        profile_html += "</div>"
+        st.markdown(profile_html, unsafe_allow_html=True)
+        
+    with col_alerts:
+        st.markdown("<div class='panel-header' style='color:#EF4444;'>⚡ Priority Action Gaps</div>", unsafe_allow_html=True)
+        alerts_html = "<div class='dashboard-panel panel-right-light' style='min-height: 210px; max-height: 210px; overflow-y: auto;'>"
+        if not df_open.empty:
+            col_target_issue = 'Issue' if 'Issue' in df_open.columns else df_open.columns[2]
+            for _, row in df_open.iterrows():
+                alerts_html += f"<div style='padding: 4px 8px; background: rgba(239,68,68,0.06); border-left: 3px solid #EF4444; border-radius:4px; margin-bottom:6px; font-size:0.8rem; color:#F3F4F6;'>{row[col_target_issue]}</div>"
+        alerts_html += "</div>"
+        st.markdown(alerts_html, unsafe_allow_html=True)
 
     # --- INSTRUMENT PANEL VIEWPORT CORE ---
     st.markdown("<div class='panel-header'>🎛️ Instrument Panel Console Viewport</div>", unsafe_allow_html=True)
@@ -229,8 +232,9 @@ with tab_command:
     st.markdown("<div class='panel-header'>💊 Strategies & Screenings</div>", unsafe_allow_html=True)
     col_tx, col_pd = st.columns(2)
     with col_tx:
+        # FIXED: Removed fragile HTML splits and used a single, closed markdown component
         tx_html = """
-        <div class='dashboard-panel panel-left-heavy' style='min-height:180px; max-width: 100%; flex: 1;'>
+        <div class='dashboard-panel panel-left-heavy' style='min-height:220px;'>
             <div style='font-weight:600; font-size:0.9rem; margin-bottom:8px;'>🏋️‍♂️ Active Treatment / Exercise Tracking Loops</div>
             <div style='font-size:0.85rem; line-height:1.45; color:#E5E7EB;'>
                 • <strong>Parenteral Repletion Regimen:</strong> Bypassing eosinophilic mucosal blocks.<br>
@@ -241,31 +245,28 @@ with tab_command:
         """
         st.markdown(tx_html, unsafe_allow_html=True)
     with col_pd:
-        st.markdown("<div class='dashboard-panel panel-left-heavy' style='min-height:180px; max-width: 100%; flex: 1;'>", unsafe_allow_html=True)
-        st.write("🔬 **Pending / Ordered Specialized Screenings (Dr. Domingues)**")
+        # FIXED: Removed HTML wrappers completely around native dataframe to ensure it skins perfectly via CSS targets
         if not df_pending.empty:
             st.dataframe(df_pending, use_container_width=True, hide_index=True)
         else:
-            st.write("No diagnostic tracking metrics currently pending.")
-        st.markdown("</div>", unsafe_allow_html=True)
+            st.markdown("<div class='dashboard-panel panel-left-heavy' style='min-height:220px; color:#9CA3AF;'>No diagnostic tracking metrics currently pending.</div>", unsafe_allow_html=True)
 
     # --- STEP 3: CURATED RESEARCH REPOSITORY & DOCUMENT INGESTION HUB ---
     st.markdown("<div class='panel-header'>📁 Literature Repository & Document Ingestion Core</div>", unsafe_allow_html=True)
     col_upload, col_lit = st.columns(2)
     with col_upload:
-        st.markdown("<div class='dashboard-panel panel-left-heavy' style='min-height:210px; max-width: 100%; flex: 1;'>", unsafe_allow_html=True)
-        st.write("📥 **Ingest Latest Academic Literature or Clinical Briefs**")
-        uploaded_research = st.file_uploader("Drop new medical consult notes, peer-reviewed papers, or genomics PDFs here:", type=["pdf", "txt", "png", "jpg"], key="research_uploader_deck_v2")
+        # FIXED: Let Streamlit render the uploader natively, customized seamlessly via global CSS variables
+        uploaded_research = st.file_uploader("Drop new medical consult notes, peer-reviewed papers, or genomics PDFs here:", type=["pdf", "txt", "png", "jpg"], key="research_uploader_deck_v3")
         if uploaded_research:
             st.success(f"Document '{uploaded_research.name}' successfully parsed into active session memory context!")
-        st.markdown("</div>", unsafe_allow_html=True)
     with col_lit:
+        # FIXED: Consolidated entire layout block into a single unified HTML block string variable
         lit_html = """
-        <div class='dashboard-panel panel-left-heavy' style='min-height:210px; max-width: 100%; flex: 1;'>
+        <div class='dashboard-panel panel-left-heavy' style='min-height:180px;'>
             <div style='font-weight:600; font-size:0.9rem; margin-bottom:8px;'>📚 Curated Research References & Case Studies</div>
             <div style='font-size:0.82rem; line-height:1.45; color:#9CA3AF;'>
                 • <strong>Roufosse et al. (Blood Journal):</strong> Functional mechanism tracking of <em>CD3+ CD4+ CD7-</em> T-cell expansions, clonal evolution patterns, and indolent L-HES course tracking guidelines.<br>
-                • <strong>Simon et al. (Allergy Journal):</strong> Autocrine loops of <em>IL-5</em> overproduction running entirely independent of traditional IgE allergy profiles.<br>
+                • <strong>Simon et al. (Allergy Journal):** Autocrine loops of <em>IL-5</em> overproduction running entirely independent of traditional IgE allergy profiles.<br>
                 • <strong>Castellvi Classification Metrics:</strong> Clinical assessment of structural lumbosacral transitional vertebrae (LSTV) and secondary mechanical shear stress amplification upwards into L4 corner coordinates.
             </div>
         </div>
