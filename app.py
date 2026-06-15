@@ -37,18 +37,17 @@ st.markdown("""
         margin-bottom: 20px;
         backdrop-filter: blur(12px);
         box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
-        transition: border 0.3s ease;
     }
-    .command-card:hover { border: 1px solid rgba(0, 242, 254, 0.3); }
-    .card-critical { border-left: 4px solid #EF4444 !important; background: linear-gradient(135deg, rgba(30, 10, 18, 0.7) 0%, rgba(15, 23, 42, 0.5) 100%); }
+    .card-critical { border-left: 4px solid #EF4444 !important; background: linear-gradient(135deg, rgba(44, 16, 24, 0.7) 0%, rgba(15, 23, 42, 0.5) 100%); }
     
     /* Metric Typography */
-    .metric-label { font-size: 0.75rem; text-transform: uppercase; color: #9CA3AF; font-weight: 600; letter-spacing: 0.5px; height: 35px; overflow: hidden; }
-    .metric-val { font-size: 2.1rem; font-weight: 700; color: #FFFFFF; font-family: 'JetBrains Mono', monospace; margin-top: 4px; }
+    .metric-label { font-size: 0.78rem; text-transform: uppercase; color: #9CA3AF; font-weight: 600; letter-spacing: 0.5px; min-height: 38px; display: flex; align-items: center; }
+    .metric-val { font-size: 1.9rem; font-weight: 700; color: #FFFFFF; font-family: 'JetBrains Mono', monospace; margin-top: 4px; }
     .metric-unit { font-size: 0.85rem; color: #00F2FE; font-weight: 500; margin-left: 2px; }
+    .metric-desc { font-size: 0.75rem; color: #9CA3AF; margin-top: 8px; line-height: 1.4; min-height: 45px; }
     
     /* Status Badges */
-    .alert-badge { padding: 4px 10px; border-radius: 8px; font-size: 0.7rem; font-weight: 700; display: inline-block; text-transform: uppercase; margin-top: 10px; letter-spacing: 0.5px; }
+    .alert-badge { padding: 4px 10px; border-radius: 6px; font-size: 0.68rem; font-weight: 700; display: inline-block; text-transform: uppercase; margin-top: 10px; letter-spacing: 0.5px; }
     .badge-critical { background-color: rgba(239, 68, 68, 0.15); color: #F87171; border: 1px solid rgba(239, 68, 68, 0.3); }
     .badge-baseline { background-color: rgba(16, 185, 129, 0.15); color: #34D399; border: 1px solid rgba(16, 185, 129, 0.3); }
     
@@ -63,23 +62,22 @@ st.markdown("""
 st.markdown("<div class='cockpit-title'>🎛️ Case Matrix Command Bridge</div>", unsafe_allow_html=True)
 st.markdown("<div class='cockpit-subtitle'>Longitudinal Health Core & High-Fidelity Tactical Interface</div>", unsafe_allow_html=True)
 
-# --- STEP 1: INITIALIZE STABLE SOURCE-OF-TRUTH SESSION DATA ---
+# --- STEP 1: INITIALIZE STABLE EXCEL LOADER CORE ---
 EXCEL_FILE = "Master_Clinical_Registry_June_2026.xlsx"
 
 def load_excel_matrices(source):
     try:
-        xls = pd.ExcelFile(source)
+        # FIXED: Added engine_kwargs={'data_only': True} to clear formula calculation crashes
+        xls = pd.ExcelFile(source, engine_kwargs={'data_only': True})
         sheets = xls.sheet_names
         st.session_state['df_registry'] = pd.read_excel(xls, "Master Registry") if "Master Registry" in sheets else pd.DataFrame()
         st.session_state['df_open'] = pd.read_excel(xls, "Open Items") if "Open Items" in sheets else pd.DataFrame()
         st.session_state['df_summary'] = pd.read_excel(xls, "Summary") if "Summary" in sheets else pd.DataFrame()
         st.session_state['df_pending'] = pd.read_excel(xls, "Pending & Ordered") if "Pending & Ordered" in sheets else pd.DataFrame()
-        st.session_state['df_dict'] = pd.read_excel(xls, "Data Dictionary") if "Data Dictionary" in sheets else pd.DataFrame()
         st.session_state['data_initialized'] = True
     except Exception as e:
-        st.error(f"Critical error unpacking database registry sheets: {e}")
+        st.error(f"Critical error unpacking spreadsheet tabs: {e}")
 
-# Check if the session data already exists; if not, look for the file location
 if 'data_initialized' not in st.session_state:
     if os.path.exists(EXCEL_FILE):
         load_excel_matrices(EXCEL_FILE)
@@ -94,7 +92,7 @@ if 'data_initialized' not in st.session_state:
             st.rerun()
         st.stop()
 
-# Short reference variable tags for clean internal layout tracking
+# Isolate internal data references
 df_registry = st.session_state.get('df_registry', pd.DataFrame())
 df_open = st.session_state.get('df_open', pd.DataFrame())
 df_summary = st.session_state.get('df_summary', pd.DataFrame())
@@ -110,97 +108,100 @@ tab_command, tab_analytics, tab_database, tab_intelligence = st.tabs([
 
 # ==================== NAVIGATION TAB 1: STRATEGIC COMMAND DECK ====================
 with tab_command:
-    # Row 1: Split Layout (Patient Profile Summary vs. High-Priority Items)
     col_profile, col_alerts = st.columns([2, 1])
     
     with col_profile:
-        st.markdown("<div class='panel-header'>📋 Executive Patient Profile</div>", unsafe_allow_html=True)
-        st.markdown("<div class='command-card' style='min-height: 230px;'>", unsafe_allow_html=True)
+        st.markdown("<div class='panel-header'>📋 Executive Patient Profile Summary</div>", unsafe_allow_html=True)
+        st.markdown("<div class='command-card' style='min-height: 250px;'>", unsafe_allow_html=True)
         if not df_summary.empty:
-            for _, row in df_summary.iterrows():
-                st.markdown(f"<div style='margin-bottom:10px;'><strong style='color:#00F2FE;'>{row.iloc[0]}:</strong> <span style='color:#E5E7EB;'>{row.iloc[1]}</span></div>", unsafe_allow_html=True)
+            # Safely read cover rows and display them cleanly
+            for idx, row in df_summary.dropna(subset=[df_summary.columns[0], df_summary.columns[1]], how='any').iterrows():
+                lbl = str(row.iloc[0]).strip()
+                val = str(row.iloc[1]).strip()
+                if any(x in lbl.lower() for x in ["rows", "priority", "result", "question", "imaging"]):
+                    st.markdown(f"<div style='margin-bottom:8px;'><strong style='color:#00F2FE;'>{lbl}:</strong> <span style='color:#E5E7EB;'>{val}</span></div>", unsafe_allow_html=True)
         else:
-            st.info("Profile tracking metadata empty or formatted incorrectly inside Excel sheet rows.")
+            st.info("Profile summary overview empty or format mismatched.")
         st.markdown("</div>", unsafe_allow_html=True)
         
     with col_alerts:
-        st.markdown("<div class='panel-header' style='color:#EF4444;'>⚡ System Open Items</div>", unsafe_allow_html=True)
-        st.markdown("<div class='command-card' style='min-height: 230px; overflow-y: auto;'>", unsafe_allow_html=True)
-        if not df_open.empty:
+        st.markdown("<div class='panel-header' style='color:#EF4444;'>⚡ Priority Action Gaps</div>", unsafe_allow_html=True)
+        st.markdown("<div class='command-card' style='min-height: 250px; overflow-y: auto;'>", unsafe_allow_html=True)
+        if not df_open.empty and "Issue" in df_open.columns:
             for _, row in df_open.iterrows():
-                st.markdown(f"<div style='padding: 6px 10px; background: rgba(239,68,68,0.08); border-left: 3px solid #EF4444; border-radius:4px; margin-bottom:8px; font-size:0.85rem; color:#F3F4F6;'>{row.iloc[0]}</div>", unsafe_allow_html=True)
+                st.markdown(f"<div style='padding: 6px 10px; background: rgba(239,68,68,0.08); border-left: 3px solid #EF4444; border-radius:4px; margin-bottom:8px; font-size:0.85rem;'>{row['Issue']}</div>", unsafe_allow_html=True)
+        elif not df_open.empty:
+            for _, row in df_open.iterrows():
+                st.markdown(f"<div style='padding: 6px 10px; background: rgba(239,68,68,0.08); border-left: 3px solid #EF4444; border-radius:4px; margin-bottom:8px; font-size:0.85rem;'>{row.iloc[2]}</div>", unsafe_allow_html=True)
         else:
-            st.write("No open tracking metrics currently flagged.")
+            st.write("No active priority gaps recorded.")
         st.markdown("</div>", unsafe_allow_html=True)
 
-    # Row 2: Dynamic Visual Infographic Grid (Only loops over actual metrics flagged as anomalies)
-    st.markdown("<div class='panel-header'>🚨 Flagged Anomalies & Biomarker Exceptions</div>", unsafe_allow_html=True)
-    if not df_registry.empty:
-        # Detect rows tracking anomalies dynamically using simple pandas logic
-        df_anomalies = df_registry[df_registry["Status / Clinical Context"].str.contains("Anomaly|Critical|Low|High Risk|Severe", na=False)]
+    # FIXED: Re-mapped directly to matching spreadsheet columns ('Flag / Status' and 'Clinical Context / Interpretation (careful)')
+    st.markdown("<div class='panel-header'>🚨 Flagged Anomalies & Laboratory Exceptions</div>", unsafe_allow_html=True)
+    if not df_registry.empty and "Flag / Status" in df_registry.columns:
+        df_anomalies = df_registry[df_registry["Flag / Status"].str.contains("High|Low|Abnormal|Critical|Severe|Elevated|Missing", na=False, case=False)]
         
         if not df_anomalies.empty:
             anomaly_cols = st.columns(4)
             for idx, (_, row) in enumerate(df_anomalies.reset_index().iterrows()):
                 target_col = anomaly_cols[idx % 4]
+                unit_label = row['Unit'] if pd.notna(row['Unit']) else ''
+                desc_label = row['Clinical Context / Interpretation (careful)'] if pd.notna(row['Clinical Context / Interpretation (careful)']) else ''
+                
                 with target_col:
                     st.markdown(f"""
                     <div class='command-card card-critical'>
                         <div class='metric-label'>{row['Marker / Clinical Event']}</div>
-                        <div class='metric-val'>{row['Value']}<span class='metric-unit'> {row['Unit'] if pd.notna(row['Unit']) else ''}</span></div>
-                        <div class='alert-badge badge-critical'>{row['Status / Clinical Context']}</div>
+                        <div class='metric-val'>{row['Value']}<span class='metric-unit'> {unit_label}</span></div>
+                        <div class='alert-badge badge-critical'>{row['Flag / Status']}</div>
+                        <div class='metric-desc'>{desc_label}</div>
                     </div>
                     """, unsafe_allow_html=True)
         else:
-            st.success("All system biological biomarkers currently verified inside control parameters.")
+            st.success("All lab parameters currently sit within verified standard references.")
+    else:
+        st.warning("Master Registry spreadsheet columns unreadable or mismatched.")
 
-    # Row 3: Therapeutic Interventions & Lab Pipeline
-    st.markdown("<div class='panel-header'>💊 Therapeutic Frameworks & Diagnostic Pipelines</div>", unsafe_allow_html=True)
+    # Row 3: Therapeutic Frameworks & Diagnostics
+    st.markdown("<div class='panel-header'>💊 Strategies & Screenings</div>", unsafe_allow_html=True)
     col_tx, col_pd = st.columns(2)
-    
-    # FIXED: Replaced invalid syntax with standard Streamlit context calls
     with col_tx:
         st.markdown("<div class='command-card' style='min-height:220px;'>", unsafe_allow_html=True)
-        st.write("🏋️‍♂️ **Active Care Strategies & Exercises**")
+        st.write("🏋️‍♂️ **Active Treatment / Exercise Tracking Loops**")
         st.markdown("""
         - **Parenteral Repletion Regimen:** Bypassing underlying eosinophilic gastric mucosal absorption blocks.
         - **Targeted Methylation Acceleration Support:** Lowering high systemic neurotoxic Homocysteine volumes.
         - **Sacroiliac Joint Decompression Stretching:** Daily mobility target sequences structured to unburden the lower *Castellvi IIIA* segment mechanics.
         """)
         st.markdown("</div>", unsafe_allow_html=True)
-        
     with col_pd:
         st.markdown("<div class='command-card' style='min-height:220px;'>", unsafe_allow_html=True)
         st.write("🔬 **Pending / Ordered Specialized Screenings (Dr. Domingues)**")
         if not df_pending.empty:
             st.dataframe(df_pending, use_container_width=True, hide_index=True)
         else:
-            st.write("No diagnostic tracking metrics currently pending.")
+            st.write("No specialized screening items currently pending or processing.")
         st.markdown("</div>", unsafe_allow_html=True)
 
 # ==================== NAVIGATION TAB 2: LONGITUDINAL ANALYTICS ====================
 with tab_analytics:
     st.markdown("### 📈 Cross-Filter Graphical Analytics Engine")
-    st.write("Isolate, cross-examine, and contrast any configuration of biomarkers across your entire clinical timeline:")
-    
-    if not df_registry.empty:
+    if not df_registry.empty and "Marker / Clinical Event" in df_registry.columns:
         all_unique_markers = df_registry["Marker / Clinical Event"].dropna().unique().tolist()
-        critical_markers = df_registry[df_registry["Status / Clinical Context"].str.contains("Anomaly|Critical|Low|High Risk|Severe", na=False)]["Marker / Clinical Event"].tolist()
+        critical_markers = df_registry[df_registry["Flag / Status"].str.contains("High|Low|Abnormal|Critical|Severe|Elevated", na=False, case=False)]["Marker / Clinical Event"].tolist()
         
-        # Safe multi-select menu
         filter_choices = st.multiselect(
-            "Toggle parameters to map onto the analytics array:",
-            options=all_unique_markers, default=critical_markers
+            "Select parameters to display on the analytics field:",
+            options=all_unique_markers, default=critical_markers[:6] if critical_markers else all_unique_markers[:5]
         )
         
         if filter_choices:
-            # Dynamically map and slice data vectors straight from pandas rows
             df_slice = df_registry[df_registry["Marker / Clinical Event"].isin(filter_choices)].copy()
             df_slice_numeric = df_slice[pd.to_numeric(df_slice["Value"], errors='coerce').notnull()].copy()
             df_slice_numeric["NumericValue"] = df_slice_numeric["Value"].astype(float)
             
             if not df_slice_numeric.empty:
-                # Plotly layout configuration
                 fig = px.bar(
                     df_slice_numeric, x="NumericValue", y="Marker / Clinical Event", orientation='h',
                     color="Marker / Clinical Event",
@@ -211,55 +212,41 @@ with tab_analytics:
                     paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
                     showlegend=False, height=360, font=dict(family="Plus Jakarta Sans", color="#F3F4F6")
                 )
-                fig.update_xaxes(showgrid=True, gridcolor='rgba(255,255,255,0.05)', title_text="Measurement Level Index")
+                fig.update_xaxes(showgrid=True, gridcolor='rgba(255,255,255,0.05)', title_text="Measurement Level Scale")
                 fig.update_yaxes(showgrid=False, title_text="")
                 st.plotly_chart(fig, use_container_width=True)
             else:
-                st.info("Selected indicators track qualitative metrics. Add numeric markers to render charts.")
+                st.info("Selected values contain historical qualitative markers. Choose numeric data fields to compute graphs.")
                 
             st.dataframe(df_slice, use_container_width=True, hide_index=True)
     else:
-        st.write("No registry values available to display.")
+        st.write("Ecosystem laboratory columns unavailable.")
 
 # ==================== NAVIGATION TAB 3: CORE DATA REGISTRIES ====================
 with tab_database:
-    st.markdown("### 📑 Live Database Core Editor")
-    st.write("Modify spreadsheet fields inside the live interface below. Edits are absorbed instantly across the entire analytics engine and the Gemini system context.")
-    
+    st.markdown("### Live Database Core Editor")
     if not df_registry.empty:
-        # Integrated data editor widget
-        edited_df = st.data_editor(
-            df_registry, use_container_width=True, num_rows="dynamic",
-            key="master_registry_live_editor"
-        )
-        
-        if st.button("⚡ Sync Records & Re-prime Systems"):
+        edited_df = st.data_editor(df_registry, use_container_width=True, num_rows="dynamic", key="editor_widget_stable")
+        if st.button("⚡ Save Spreadsheet Updates & Sync Engine"):
             st.session_state['df_registry'] = edited_df
-            # Clearing the chat object forces it to rebuild using the newly edited table rows
             if "gemini_chat" in st.session_state:
                 del st.session_state.gemini_chat
             st.toast("Ecosystem parameters synchronized successfully!", icon="⚡")
             st.rerun()
-    else:
-        st.error("Registry database link broken or empty.")
 
 # ==================== NAVIGATION TAB 4: GEMINI DEEP CHAT UNIT ====================
 with tab_intelligence:
     st.markdown("### 🧠 Grounded Conversational Medical Intelligence Workspace")
-    st.write("This portal operates under a strict grounding rule. It references your active Excel data rows in real-time to eliminate diagnostic drift or hallucinations.")
-
     if not GEMINI_API_KEY:
-        st.warning("⚠️ Enter a valid Google Gemini API Key in your application deployment secrets panel to activate the workspace.")
+        st.warning("⚠️ Enter your Google Gemini API Key in your application deployment deployment secrets to engage chat services.")
     else:
         genai.configure(api_key=GEMINI_API_KEY)
-        
         if "gemini_chat" not in st.session_state:
             st.session_state.chat_history = []
             try:
                 model = genai.GenerativeModel("gemini-2.5-flash")
                 st.session_state.gemini_chat = model.start_chat(history=[])
                 
-                # Transform spreadsheet rows into clean, comprehensive text tables for Gemini's context
                 txt_registry = df_registry.to_string(index=False) if not df_registry.empty else ""
                 txt_summary = df_summary.to_string(index=False) if not df_summary.empty else ""
                 txt_open = df_open.to_string(index=False) if not df_open.empty else ""
@@ -278,26 +265,21 @@ with tab_intelligence:
                     "STRICT GROUNDING RULE: Treat the provided data frame tables as absolute, unalterable facts. If any query contradicts these files or numbers, refuse to validate it. Do not invent metrics."
                 )
                 st.session_state.gemini_chat.send_message(system_primer)
-                
-                # Pre-populate chat logs to resolve empty layout dark space concerns
                 st.session_state.chat_history.append({
                     "role": "assistant",
                     "content": "🧬 **Strategic Medical Engine Initialized.** I have successfully digested all active tables from your data core sheets, established cross-system parameters, and locked your clinical timelines under strict grounding constraints. How can I assist your cross-disciplinary analysis loops today?"
                 })
             except Exception as e:
-                st.error(f"AI Core interface initialization link fault: {e}")
+                st.error(f"AI interface communication fault: {e}")
 
-        # Render conversation history logs smoothly
         for message in st.session_state.chat_history:
             with st.chat_message(message["role"]):
                 st.markdown(message["content"])
 
-        # Capture user chat queries
-        if user_query := st.chat_input("Query the clinical matrix (e.g., 'Analyze the connection between my 3.2% clone and high ECP level'):"):
+        if user_query := st.chat_input("Query the clinical matrix:"):
             with st.chat_message("user"):
                 st.markdown(user_query)
             st.session_state.chat_history.append({"role": "user", "content": user_query})
-            
             with st.chat_message("assistant"):
                 with st.spinner("Anatomizing data files..."):
                     try:
@@ -305,4 +287,4 @@ with tab_intelligence:
                         st.markdown(ai_response.text)
                         st.session_state.chat_history.append({"role": "assistant", "content": ai_response.text})
                     except Exception as e:
-                        st.error(f"The session engine encountered an isolated memory conflict. Please click 'Sync Records' in Tab 3 to clear the buffer. Error details: {e}")
+                        st.error(f"Session buffer conflict. Reset or refresh. Details: {e}")
