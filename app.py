@@ -10,122 +10,171 @@ GEMINI_API_KEY = st.secrets.get("GEMINI_API_KEY", "")
 # App Presentation Architecture
 st.set_page_config(page_title="Case Matrix Engine", page_icon="🧬", layout="wide")
 
-# --- STEP 1: INITIALIZE DYNAMIC MEMORY STORAGE ---
-# This loads the baseline figures into memory if the app is opening for the first time
-if "b12" not in st.session_state:
-    st.session_state.b12 = 177.0
-if "homocysteine" not in st.session_state:
-    st.session_state.homocysteine = 20.7
-if "ecp" not in st.session_state:
-    st.session_state.ecp = 48.4
-if "aberrant_t" not in st.session_state:
-    st.session_state.aberrant_t = 3.2
+# --- STEP 1: INITIALIZE DREARY ALL AVAILABLE CASE DATA POINTS ---
+# Storing the entire lab ecosystem in state memory for live editing
+metrics_data = {
+    "Vitamin B12 (pg/mL)": {"val": 177.0, "status": "Low / Critical", "type": "Abnormal"},
+    "Homocysteine (µmol/L)": {"val": 20.7, "status": "High Risk", "type": "Abnormal"},
+    "ECP Level (µg/L)": {"val": 48.4, "status": "Severe Degranulation", "type": "Abnormal"},
+    "CD4+CD7- T-Cell %": {"val": 3.2, "status": "Clonal Suspect", "type": "Abnormal"},
+    "CD4/CD8 Ratio": {"val": 1.14, "status": "Low / Abnormal", "type": "Abnormal"},
+    "Urine Specific Gravity": {"val": 1.003, "status": "Hypotonic Dilute", "type": "Abnormal"},
+    "24h Urine Volume (L)": {"val": 4.0, "status": "Polyuria Flux", "type": "Abnormal"},
+    "LDL Cholesterol (mg/dL)": {"val": 169.0, "status": "Elevated Atherogenic", "type": "Abnormal"},
+    "ESR (mm/h)": {"val": 25.0, "status": "Inflammatory Acceleration", "type": "Abnormal"},
+    "CPK Muscle Enzyme (U/L)": {"val": 381.0, "status": "Myofascial Strain", "type": "Abnormal"},
+    "CRP (mg/L)": {"val": 2.37, "status": "Normal Range", "type": "Normal"},
+    "Total IgE (kUA/L)": {"val": 31.0, "status": "Normal (Non-Allergic)", "type": "Normal"},
+    "Tryptase (ng/mL)": {"val": 5.0, "status": "Normal (Non-Mastocytosis)", "type": "Normal"},
+    "Leucocytes (WBC Pool G/l)": {"val": 7.16, "status": "Normal Baseline Pool", "type": "Normal"},
+    "Absolute Lymphocytes (G/l)": {"val": 1.905, "status": "Normal Homeostasis", "type": "Normal"},
+    "Absolute Blood Eosinophils (G/l)": {"val": 0.62, "status": "Borderline Baseline", "type": "Normal"}
+}
+
+for key, info in metrics_data.items():
+    state_key = key.replace(" ", "_").lower().split("(")[0].strip("_")
+    if state_key not in st.session_state:
+        st.session_state[state_key] = info["val"]
 
 # High-End Dark/Light Aesthetic Theme Injector
 st.markdown("""
 <style>
     .main-header { font-size:2.4rem !important; color:#0A2540; font-weight:700; margin-bottom:5px; }
     .sub-header { font-size:1.1rem !important; color:#639FAB; margin-bottom:20px; }
-    .card { background-color:#ffffff; padding:20px; border-radius:12px; box-shadow: 0 4px 6px rgba(50,50,93,0.1); border-left: 6px solid #639FAB; margin-bottom:15px; }
-    .metric-value { font-size:2rem; font-weight:700; color:#0A2540; }
-    .metric-lbl { font-size:0.85rem; text-transform:uppercase; color:#627D98; font-weight:600; }
-    .status-alert { padding:6px 12px; border-radius:20px; font-size:0.8rem; font-weight:700; display:inline-block; }
+    .card { background-color:#ffffff; padding:18px; border-radius:12px; box-shadow: 0 4px 6px rgba(50,50,93,0.1); border-left: 6px solid #639FAB; margin-bottom:15px; min-height: 140px; }
+    .metric-value { font-size:1.8rem; font-weight:700; color:#0A2540; margin-top:5px; margin-bottom:2px; }
+    .metric-lbl { font-size:0.8rem; text-transform:uppercase; color:#627D98; font-weight:600; display:block; min-height:35px; }
+    .status-alert { padding:4px 10px; border-radius:20px; font-size:0.75rem; font-weight:700; display:inline-block; }
     .critical-bg { background-color:#FFE3E3; color:#D9383A; }
     .stable-bg { background-color:#E3FBE3; color:#247A24; }
 </style>
 """, unsafe_allow_html=True)
 
-# Main Title Grid
 st.markdown("<div class='main-header'>🧬 Case Matrix Ecosystem</div>", unsafe_allow_html=True)
 st.markdown("<div class='sub-header'>Systemic Multi-Engine Research, Mapping, & Clinical Intel Control Panel</div>", unsafe_allow_html=True)
 st.markdown("---")
 
-# --- STEP 2: BUILD THE SIDEBAR LAB EDITOR WINDOW ---
-st.sidebar.header("⚙️ Interactive Lab Editor")
-st.sidebar.write("Modify any value below to dynamically alter the hardcoded underlying memory anchor:")
+# --- STEP 2: SIDEBAR LAB REGISTRY EDITOR ---
+st.sidebar.header("⚙️ Comprehensive Lab Registry")
+st.sidebar.write("Update hardcoded parameters inside the baseline system:")
 
-with st.sidebar.expander("🛠️ Edit Active Biomarkers", expanded=True):
-    input_b12 = st.number_input("Vitamin B12 (pg/mL):", value=st.session_state.b12, step=1.0)
-    input_homo = st.number_input("Homocysteine (µmol/L):", value=st.session_state.homocysteine, step=0.1)
-    input_ecp = st.number_input("ECP Level (µg/L):", value=st.session_state.ecp, step=0.1)
-    input_tcell = st.number_input("CD4+CD7- T-Cell %:", value=st.session_state.aberrant_t, step=0.1)
+with st.sidebar.expander("🛠️ Edit Data Repository Fields", expanded=False):
+    edit_b12 = st.number_input("Vitamin B12:", value=st.session_state.vitamin_b12, step=1.0)
+    edit_homo = st.number_input("Homocysteine:", value=st.session_state.homocysteine, step=0.1)
+    edit_ecp = st.number_input("ECP Level:", value=st.session_state.ecp_level, step=0.1)
+    edit_tcell = st.number_input("CD4+CD7- T-Cell %:", value=st.session_state.cd4+cd7-_t-cell, step=0.1)
+    edit_ratio = st.number_input("CD4/CD8 Ratio:", value=st.session_state.cd4/cd8_ratio, step=0.01)
+    edit_sg = st.number_input("Urine Specific Gravity:", value=st.session_state.urine_specific_gravity, format="%.3f", step=0.001)
+    edit_uvol = st.number_input("24h Urine Volume:", value=st.session_state.24h_urine_volume, step=0.1)
+    edit_ldl = st.number_input("LDL Cholesterol:", value=st.session_state.ldl_cholesterol, step=1.0)
+    edit_esr = st.number_input("ESR Rate:", value=st.session_state.esr, step=1.0)
+    edit_cpk = st.number_input("CPK Muscle Enzyme:", value=st.session_state.cpk_muscle_enzyme, step=1.0)
+    edit_crp = st.number_input("CRP Rate:", value=st.session_state.crp, step=0.1)
+    edit_ige = st.number_input("Total IgE:", value=st.session_state.total_ige, step=1.0)
+    edit_tryp = st.number_input("Tryptase:", value=st.session_state.tryptase, step=0.1)
 
-# The master execution button to reset cache and apply parameters
 if st.sidebar.button("💾 Apply Changes & Re-prime AI"):
-    st.session_state.b12 = input_b12
-    st.session_state.homocysteine = input_homo
-    st.session_state.ecp = input_ecp
-    st.session_state.aberrant_t = input_tcell
-    
-    # Deleting the chat forces the app to build a brand new model containing the fresh numbers
+    st.session_state.vitamin_b12 = edit_b12
+    st.session_state.homocysteine = edit_homo
+    st.session_state.ecp_level = edit_ecp
+    st.session_state.cd4+cd7-_t-cell = edit_tcell
+    st.session_state.cd4/cd8_ratio = edit_ratio
+    st.session_state.urine_specific_gravity = edit_sg
+    st.session_state.24h_urine_volume = edit_uvol
+    st.session_state.ldl_cholesterol = edit_ldl
+    st.session_state.esr = edit_esr
+    st.session_state.cpk_muscle_enzyme = edit_cpk
+    st.session_state.crp = edit_crp
+    st.session_state.total_ige = edit_ige
+    st.session_state.tryptase = edit_tryp
     if "gemini_chat" in st.session_state:
         del st.session_state.gemini_chat
-    st.toast("Baseline memory updated successfully!", icon="💾")
+    st.toast("System master memory updated!", icon="💾")
     st.rerun()
 
-# Layout Matrix Configuration
-col_left, col_right = st.columns([2, 1])
+# --- STEP 3: MASTER FILTER MANAGEMENT WORKSPACE ---
+st.subheader("🔍 Filter & Select Target Matrix Indicators")
+all_available_labels = list(metrics_data.keys())
+default_abnormal_labels = [k for k, v in metrics_data.items() if v["type"] == "Abnormal"]
 
-with col_left:
-    st.subheader("📊 Active Biophysical Biomarker Gauges")
-    
-    # Generate interactive charts using the dynamically stored numbers
-    metric_labels = ['B12 (Target >300)', 'Homocysteine (<10)', 'ECP (<13.3)', 'Aberrant T-Cells %']
-    metric_values = [st.session_state.b12, st.session_state.homocysteine, st.session_state.ecp, st.session_state.aberrant_t]
-    metric_colors = ['#D9383A', '#D9383A', '#D9383A', '#4A90E2']
-    
-    fig = px.bar(
-        x=metric_values, y=metric_labels, orientation='h',
-        color=metric_labels, color_discrete_sequence=metric_colors,
-        labels={'x':'Value Scale', 'y':'Marker'}
-    )
-    fig.update_layout(showlegend=False, height=260, margin=dict(l=20, r=20, t=10, b=10))
-    st.plotly_chart(fig, use_container_width=True)
-    
-    # 4-Column Metric Grid System fed dynamically from state memory
-    m1, m2, m3, m4 = st.columns(4)
-    with m1:
-        st.markdown(f"<div class='card'><span class='metric-lbl'>Vitamin B12</span><br><span class='metric-value'>{st.session_state.b12}</span><br><span class='status-alert critical-bg'>Active Baseline</span></div>", unsafe_allow_html=True)
-    with m2:
-        st.markdown(f"<div class='card'><span class='metric-lbl'>Homocysteine</span><br><span class='metric-value'>{st.session_state.homocysteine}</span><br><span class='status-alert critical-bg'>Active Baseline</span></div>", unsafe_allow_html=True)
-    with m3:
-        st.markdown(f"<div class='card'><span class='metric-lbl'>ECP Level</span><br><span class='metric-value'>{st.session_state.ecp}</span><br><span class='status-alert critical-bg'>Active Baseline</span></div>", unsafe_allow_html=True)
-    with m4:
-        st.markdown(f"<div class='card'><span class='metric-lbl'>CD4+CD7- Subset</span><br><span class='metric-value'>{st.session_state.aberrant_t}%</span><br><span class='status-alert critical-bg'>Active Baseline</span></div>", unsafe_allow_html=True)
+selected_display_metrics = st.multiselect(
+    "Choose specific indicators to analyze on the charts (Defaults to flagged abnormal markers):",
+    options=all_available_labels,
+    default=default_abnormal_labels
+)
 
-    # Historical Sequence Track
-    st.subheader("⏱️ Chronological Hit Timeline")
-    timeline_events = {
-        "Phase": ["1. Background", "2. Initiation", "3. Adaptation", "4. Rebound", "5. Current Spectrum"],
-        "Year": ["Inherited", "2012 - 2014", "2014 - 2016", "2017", "2026"],
-        "Pathology Link": [
-            "Familial baseline vulnerability to lymphoma blast mutations.",
-            "Live Fasciola hepatica flukes force a permanent systemic Th2 immune shift.",
-            "Chronic stress causes a T-cell subset to drop its CD7 marker, forming a clone.",
-            "Parasite clearance triggers a Th17 rebound wave, hitting the crooked Castellvi IIIA spine.",
-            "L-HES tissue supervisor coordinates active spinal flares, high ECP, and B12 gut blocks."
-        ]
+# Render Graphics and Metric Cards dynamically based on user filters
+if not selected_display_metrics:
+    st.info("💡 Select at least one marker from the menu above to compute visual data streams.")
+else:
+    # Build Map
+    chart_mapping = {
+        "Vitamin B12 (pg/mL)": st.session_state.vitamin_b12,
+        "Homocysteine (µmol/L)": st.session_state.homocysteine,
+        "ECP Level (µg/L)": st.session_state.ecp_level,
+        "CD4+CD7- T-Cell %": st.session_state.cd4+cd7-_t-cell,
+        "CD4/CD8 Ratio": st.session_state.cd4/cd8_ratio,
+        "Urine Specific Gravity": st.session_state.urine_specific_gravity,
+        "24h Urine Volume (L)": st.session_state.24h_urine_volume,
+        "LDL Cholesterol (mg/dL)": st.session_state.ldl_cholesterol,
+        "ESR (mm/h)": st.session_state.esr,
+        "CPK Muscle Enzyme (U/L)": st.session_state.cpk_muscle_enzyme,
+        "CRP (mg/L)": st.session_state.crp,
+        "Total IgE (kUA/L)": st.session_state.total_ige,
+        "Tryptase (ng/mL)": st.session_state.tryptase,
+        "Leucocytes (WBC Pool G/l)": st.session_state.leucocytes,
+        "Absolute Lymphocytes (G/l)": st.session_state.absolute_lymphocytes,
+        "Absolute Blood Eosinophils (G/l)": st.session_state.absolute_blood_eosinophils
     }
-    st.dataframe(pd.DataFrame(timeline_events), use_container_width=True, hide_index=True)
+    
+    filtered_values = [chart_mapping[m] for m in selected_display_metrics]
+    
+    col_left, col_right = st.columns([2, 1])
+    
+    with col_left:
+        fig = px.bar(
+            x=filtered_values, y=selected_display_metrics, orientation='h',
+            labels={'x': 'Value Index', 'y': 'Selected Indicators'},
+            color=selected_display_metrics, color_discrete_sequence=px.colors.qualitative.Slate
+        )
+        fig.update_layout(showlegend=False, height=300, margin=dict(l=20, r=20, t=10, b=10))
+        st.plotly_chart(fig, use_container_width=True)
+        
+        # Render clean grid cards dynamically for selected items
+        card_columns = st.columns(min(len(selected_display_metrics), 4))
+        for idx, name in enumerate(selected_display_metrics):
+            col_target = card_columns[idx % 4]
+            val_current = chart_mapping[name]
+            is_abnormal = metrics_data[name]["type"] == "Abnormal"
+            bg_style = "critical-bg" if is_abnormal else "stable-bg"
+            lbl_style = "Flagged Anomaly" if is_abnormal else "Normal/Baseline"
+            
+            with col_target:
+                st.markdown(f"""
+                <div class='card'>
+                    <span class='metric-lbl'>{name}</span>
+                    <span class='metric-value'>{val_current}</span>
+                    <span class='status-alert {bg_style}'>{lbl_style}</span>
+                </div>
+                """, unsafe_allow_html=True)
 
-with col_right:
-    st.subheader("📁 Centralized Medical Document Ingestion")
-    uploaded_file = st.file_uploader("Drop new medical records, blood panels, or imaging briefs here:", type=["pdf", "txt", "png", "jpg"])
-    if uploaded_file:
-        st.toast("Document securely uploaded! Parsing data matrices...", icon="⚡")
-
-    st.subheader("📚 Curated Research & Case Study Portal")
-    with st.expander("🔗 Lymphocyte-Variant Hypereosinophilia (L-HES) Lit"):
-        st.markdown("""
-        * **Roufosse et al. (Blood Journal):** Long-term behavior and indolent properties of CD3+CD4+CD7- T-cell expansions. [Read Paper](https://bloodjournal.org)
-        * **Simon et al. (Allergy):** Mechanistic models of IL-5 overproduction running completely independent of IgE pathways.
-        """)
-    with st.expander("🔗 Spondyloarthritis & Biomechanical Anomalies"):
-        st.markdown("""
-        * **Castellvi Classification Review:** Assessing transitional lumbosacral vertebra-driven shear stress and its impact on structural enthesitis.
-        """)
+    with col_right:
+        st.subheader("⏱️ Chronological Hit Timeline")
+        timeline_events = {
+            "Phase": ["1. Background", "2. Initiation", "3. Adaptation", "4. Rebound", "5. Current Status"],
+            "Year": ["Inherited", "2012 - 2014", "2014 - 2016", "2017", "2026"],
+            "Pathology Link": [
+                "Familial baseline vulnerability to lymphoma blast mutations.",
+                "Live Fasciola hepatica flukes force a permanent systemic Th2 immune shift.",
+                "Chronic stress causes a T-cell subset to drop its CD7 marker, forming a clone.",
+                "Parasite clearance triggers a Th17 rebound wave, hitting the crooked Castellvi IIIA spine.",
+                "L-HES tissue supervisor coordinates active spinal flares, high ECP, and B12 gut blocks."
+            ]
+        }
+        st.dataframe(pd.DataFrame(timeline_events), use_container_width=True, hide_index=True)
 
 st.markdown("---")
+st.markdown("<div id='chat-section'></div>", unsafe_allow_html=True)
 st.subheader("💬 Gemini Multi-Disciplinary AI Portal")
 
 # Initialize and establish the Gemini Chat Stream
@@ -141,7 +190,7 @@ else:
             model = genai.GenerativeModel("gemini-2.5-flash")
             st.session_state.gemini_chat = model.start_chat(history=[])
             
-            # --- THE SYSTEM PRIMER USES DYNAMIC STRINGS TO INJECT IN-APP CHANGES ---
+            # THE COMPLETE CLINICAL KNOWLEDGE ENGINE INJECTION BLOCK
             system_primer = (
                 "MASTER CLINICAL CASE CONTEXT DATA PROTOCOL:\n\n"
                 "1. PATIENT DEMOGRAPHICS & BACKGROUND:\n"
@@ -153,13 +202,25 @@ else:
                 "- Treatment: Cleared with triclabendazole in 2014.\n"
                 "- Pathophysiology: The prolonged presence of the fluke forced an extreme systemic Th2 shift, overproducing IL-5. "
                 "The removal of the fluke in 2014 caused an intense immunological rebound effect (Th17 pathway activation).\n\n"
-                f"3. CELLULAR DISCOVERY & METRICS (CURRENT ADJUSTED BASELINE):\n"
-                f"- Vitamin B12: {st.session_state.b12} pg/mL (Bypasses gut mucosa when repleted parenterally).\n"
-                f"- Homocysteine: {st.session_state.homocysteine} µmol/L (Toxic index for peripheral myelin sheath degradation).\n"
-                f"- Eosinophil Cationic Protein (ECP): {st.session_state.ecp} µg/L (Tissue degranulation / fibroblast risk factor).\n"
-                f"- Aberrant T-Helper Cell Clone (CD3+CD4+CD7-): {st.session_state.aberrant_t}% (The identified upstream IL-5 supervisor cell line).\n\n"
+                "3. CELLULAR DISCOVERY & METRICS (CURRENT ADJUSTED SYSTEM STATE):\n"
+                f"- Vitamin B12: {st.session_state.vitamin_b12} pg/mL\n"
+                f"- Homocysteine: {st.session_state.homocysteine} µmol/L\n"
+                f"- Eosinophil Cationic Protein (ECP): {st.session_state.ecp_level} µg/L\n"
+                f"- Aberrant T-Helper Cell Clone (CD3+CD4+CD7-): {st.session_state.cd4+cd7-_t-cell}%\n"
+                f"- CD4/CD8 Ratio: {st.session_state.cd4/cd8_ratio}\n"
+                f"- Urine Specific Gravity: {st.session_state.urine_specific_gravity}\n"
+                f"- 24h Urine Volume: {st.session_state.24h_urine_volume} L\n"
+                f"- LDL Cholesterol: {st.session_state.ldl_cholesterol} mg/dL\n"
+                f"- ESR Rate: {st.session_state.esr} mm/h\n"
+                f"- CPK Muscle Enzyme: {st.session_state.cpk_muscle_enzyme} U/L\n"
+                f"- CRP Level: {st.session_state.crp} mg/L\n"
+                f"- Total IgE: {st.session_state.total_ige} kUA/L\n"
+                f"- Tryptase: {st.session_state.tryptase} ng/mL\n"
+                f"- Leucocytes (WBC): {st.session_state.leucocytes} G/l\n"
+                f"- Absolute Lymphocytes: {st.session_state.absolute_lymphocytes} G/l\n"
+                f"- Absolute Blood Eosinophils: {st.session_state.absolute_blood_eosinophils} G/l\n\n"
                 "4. SAFETY EXCLUSIONS:\n"
-                "- Total IgE normal (31 kUA/L), Tryptase normal (5.0 ng/mL). Rules out standard allergies and mastocytosis.\n\n"
+                "- Total IgE and Tryptase remain perfectly normal. Rules out standard allergies and mastocytosis.\n\n"
                 "5. SKELETAL & BIOMECHANICAL TRAJECTORY (axSpA):\n"
                 "- Diagnosis: Documented Seronegative Axial Spondyloarthritis.\n"
                 "- Radiographical Progression (March 24, 2026 MRI): Active 8x4 mm bone marrow edema focus on the Left SI joint "
@@ -184,6 +245,12 @@ else:
                 "you must state that you do not have the data to support that conclusion. Do not invent or alter any clinical metrics."
             )
             st.session_state.gemini_chat.send_message(system_primer)
+            
+            # FIX FOR EYE-LINE CONFUSION: Automatically populate an initial response greeting
+            st.session_state.chat_history.append({
+                "role": "assistant", 
+                "content": "👋 **Welcome to the Secure Case Matrix Engine.** I have fully aligned all available clinical data points, genetic histories, parasitic context records, and custom lab filters. The workspace is active and primed under strict grounding constraints. How can I assist you with cross-system data correlation or risk assessment analysis today?"
+            })
         except Exception as e:
             st.error(f"Failed to initialize clean chat model: {e}")
 
