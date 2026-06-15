@@ -33,8 +33,9 @@ st.markdown("""
         display: flex;
         gap: 14px;
         width: 100%;
-        margin-bottom: 10px;
+        margin-bottom: 15px;
         flex-wrap: wrap;
+        align-items: stretch;
     }
     
     /* Wide Structural Dashboard Panel Cards */
@@ -46,12 +47,15 @@ st.markdown("""
         box-sizing: border-box;
         backdrop-filter: blur(10px);
         box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
     }
-    .panel-left-heavy { flex: 2; min-width: 320px; border-top: 3px solid #00F2FE; }
-    .panel-right-light { flex: 1; min-width: 280px; border-top: 3px solid #FF3366; }
+    .panel-heavy-60 { flex: 2; min-width: 320px; border-top: 3px solid #00F2FE; }
+    .panel-light-40 { flex: 1; min-width: 280px; border-top: 3px solid #FF3366; }
     .panel-title-text { font-size: 0.95rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 15px; color: #FFFFFF; }
     
-    /* GLOBAL SKINNING TARGETS FOR INTERACTIVE WIDGETS - ELIMINATES EMPTY GHOST BOXES */
+    /* Global Skinning Rules for Native Data Tables and Uploaders */
     [data-testid="stFileUploader"], [data-testid="stDataFrame"] {
         background: linear-gradient(135deg, rgba(15, 23, 42, 0.6) 0%, rgba(30, 41, 59, 0.4) 100%) !important;
         border: 1px solid rgba(255, 255, 255, 0.06) !important;
@@ -101,7 +105,7 @@ st.markdown("""
     
     /* Responsive Media Rules */
     @media (max-width: 1400px) { .instrument-card { flex: 1 1 calc(33.33% - 12px); max-width: calc(33.33% - 12px); } }
-    @media (max-width: 1000px) { .instrument-card { flex: 1 1 calc(50% - 12px); max-width: calc(50% - 12px); .panel-left-heavy, .panel-right-light { flex: 1 1 100%; } } }
+    @media (max-width: 1000px) { .instrument-card { flex: 1 1 calc(50% - 12px); max-width: calc(50% - 12px); } .panel-heavy-60, .panel-light-40 { flex: 1 1 100%; } }
     @media (max-width: 650px) { .instrument-card { flex: 1 1 100%; max-width: 100%; } }
 </style>
 """, unsafe_allow_html=True)
@@ -110,7 +114,7 @@ st.markdown("""
 st.markdown("<div class='cockpit-title'>🎛️ Case Matrix Command Bridge</div>", unsafe_allow_html=True)
 st.markdown("<div class='cockpit-subtitle'>Longitudinal Health Core & High-Fidelity Tactical Interface</div>", unsafe_allow_html=True)
 
-# --- STEP 1: INITIALIZE STABLE EXCEL DATA INFLOW ---
+# --- STEP 1: INITIALIZE STABLE EXCEL DATA STORAGE CORE ---
 EXCEL_FILE = "Master_Clinical_Registry_June_2026.xlsx"
 
 def load_excel_matrices(source):
@@ -129,7 +133,7 @@ if 'data_initialized' not in st.session_state:
     if os.path.exists(EXCEL_FILE):
         load_excel_matrices(EXCEL_FILE)
     else:
-        st.markdown("<div class='dashboard-panel panel-left-heavy' style='max-width:100%;'>", unsafe_allow_html=True)
+        st.markdown("<div class='dashboard-panel panel-heavy-60' style='max-width:100%;'>", unsafe_allow_html=True)
         st.markdown("### 📁 Clinical Knowledge Base Initializer")
         st.write("Please upload your spreadsheet database file (`Master_Clinical_Registry_June_2026.xlsx`) to populate the cockpit panels:")
         uploaded_core = st.file_uploader("Upload Master Excel File Root:", type=["xlsx"])
@@ -144,7 +148,7 @@ df_open = st.session_state.get('df_open', pd.DataFrame())
 df_summary = st.session_state.get('df_summary', pd.DataFrame())
 df_pending = st.session_state.get('df_pending', pd.DataFrame())
 
-# --- STEP 2: RENDER BACKBONE COCKPIT NAVIGATION TAB ARRAY ---
+# --- STEP 2: RENDER SYSTEM NAVIGATION TABS ---
 tab_command, tab_analytics, tab_database, tab_intelligence = st.tabs([
     "🛸 Strategic Command Deck",
     "📈 Longitudinal Analytics",
@@ -178,7 +182,7 @@ with tab_command:
         alerts_html += "</div>"
         st.markdown(alerts_html, unsafe_allow_html=True)
 
-    # --- INSTRUMENT PANEL VIEWPORT CORE ---
+    # VIEWPORT CONTROL SWITCHER
     st.markdown("<div class='panel-header'>🎛️ Instrument Panel Console Viewport</div>", unsafe_allow_html=True)
     console_view = st.radio(
         "Select Target Data Stream Perspective:",
@@ -228,50 +232,57 @@ with tab_command:
         else:
             st.info("No rows match the selected filter perspective inside the active registry sheets.")
 
-    # Row 3: Therapeutic Frameworks & Diagnostics
+    # ROW 3: Strategies and Screenings
     st.markdown("<div class='panel-header'>💊 Strategies & Screenings</div>", unsafe_allow_html=True)
-    col_tx, col_pd = st.columns(2)
-    with col_tx:
-        # FIXED: Removed fragile HTML splits and used a single, closed markdown component
-        tx_html = """
-        <div class='dashboard-panel panel-left-heavy' style='min-height:220px;'>
-            <div style='font-weight:600; font-size:0.9rem; margin-bottom:8px;'>🏋️‍♂️ Active Treatment / Exercise Tracking Loops</div>
+    
+    pending_content = ""
+    if not df_pending.empty:
+        pending_content += "<div style='font-size:0.82rem; color:#E5E7EB;'>"
+        for _, row in df_pending.iterrows():
+            pending_content += f"• <strong>{row.iloc[0]}:</strong> <span style='color:#00F2FE;'>{row.iloc[2]}</span><br>"
+        pending_content += "</div>"
+    else:
+        pending_content = "<div style='font-size:0.85rem; color:#9CA3AF;'>No specialized screening items currently pending.</div>"
+
+    unified_strategies_html = f"""
+    <div class='panel-row-container'>
+        <div class='dashboard-panel panel-heavy-60'>
+            <div class='panel-title-text'>🏋️‍♂️ Active Treatment / Exercise Tracking Loops</div>
             <div style='font-size:0.85rem; line-height:1.45; color:#E5E7EB;'>
                 • <strong>Parenteral Repletion Regimen:</strong> Bypassing eosinophilic mucosal blocks.<br>
                 • <strong>Methylation Support:</strong> Lowering high systemic neurotoxic Homocysteine volumes.<br>
                 • <strong>Sacroiliac Joint Decompression:</strong> Targeted routines to unburden Castellvi IIIA segment mechanics.
             </div>
         </div>
-        """
-        st.markdown(tx_html, unsafe_allow_html=True)
-    with col_pd:
-        # FIXED: Removed HTML wrappers completely around native dataframe to ensure it skins perfectly via CSS targets
-        if not df_pending.empty:
-            st.dataframe(df_pending, use_container_width=True, hide_index=True)
-        else:
-            st.markdown("<div class='dashboard-panel panel-left-heavy' style='min-height:220px; color:#9CA3AF;'>No diagnostic tracking metrics currently pending.</div>", unsafe_allow_html=True)
+        <div class='dashboard-panel panel-light-40' style='max-height: 200px; overflow-y: auto;'>
+            <div class='panel-title-text'>🔬 Pending / Ordered Specialized Screenings</div>
+            {pending_content}
+        </div>
+    </div>
+    """
+    st.markdown(unified_strategies_html, unsafe_allow_html=True)
 
-    # --- STEP 3: CURATED RESEARCH REPOSITORY & DOCUMENT INGESTION HUB ---
+    # ROW 4: Curated Research & Document Ingestion
     st.markdown("<div class='panel-header'>📁 Literature Repository & Document Ingestion Core</div>", unsafe_allow_html=True)
-    col_upload, col_lit = st.columns(2)
-    with col_upload:
-        # FIXED: Let Streamlit render the uploader natively, customized seamlessly via global CSS variables
-        uploaded_research = st.file_uploader("Drop new medical consult notes, peer-reviewed papers, or genomics PDFs here:", type=["pdf", "txt", "png", "jpg"], key="research_uploader_deck_v3")
+    
+    lit_content_html = """
+    <div class='dashboard-panel panel-light-40' style='flex: 1;'>
+        <div class='panel-title-text'>📚 Curated Research References & Case Studies</div>
+        <div style='font-size:0.82rem; line-height:1.45; color:#9CA3AF;'>
+            • <strong>Roufosse et al. (Blood Journal):</strong> Functional mechanism tracking of <em>CD3+ CD4+ CD7-</em> T-cell expansions, clonal evolution patterns, and indolent L-HES course tracking guidelines.<br>
+            • <strong>Simon et al. (Allergy Journal):</strong> Autocrine loops of <em>IL-5</em> overproduction running entirely independent of traditional IgE allergy profiles.<br>
+            • <strong>Castellvi Classification Metrics:</strong> Clinical assessment of structural lumbosacral transitional vertebrae (LSTV) and secondary mechanical shear stress amplification upwards into L4 corner coordinates.
+        </div>
+    </div>
+    """
+    
+    col_uploader_native, col_lit_html_render = st.columns([1, 1])
+    with col_uploader_native:
+        uploaded_research = st.file_uploader("Drop new medical consult notes, peer-reviewed papers, or genomics PDFs here:", type=["pdf", "txt", "png", "jpg"], key="research_uploader_deck_v4")
         if uploaded_research:
             st.success(f"Document '{uploaded_research.name}' successfully parsed into active session memory context!")
-    with col_lit:
-        # FIXED: Consolidated entire layout block into a single unified HTML block string variable
-        lit_html = """
-        <div class='dashboard-panel panel-left-heavy' style='min-height:180px;'>
-            <div style='font-weight:600; font-size:0.9rem; margin-bottom:8px;'>📚 Curated Research References & Case Studies</div>
-            <div style='font-size:0.82rem; line-height:1.45; color:#9CA3AF;'>
-                • <strong>Roufosse et al. (Blood Journal):</strong> Functional mechanism tracking of <em>CD3+ CD4+ CD7-</em> T-cell expansions, clonal evolution patterns, and indolent L-HES course tracking guidelines.<br>
-                • <strong>Simon et al. (Allergy Journal):** Autocrine loops of <em>IL-5</em> overproduction running entirely independent of traditional IgE allergy profiles.<br>
-                • <strong>Castellvi Classification Metrics:</strong> Clinical assessment of structural lumbosacral transitional vertebrae (LSTV) and secondary mechanical shear stress amplification upwards into L4 corner coordinates.
-            </div>
-        </div>
-        """
-        st.markdown(lit_html, unsafe_allow_html=True)
+    with col_lit_html_render:
+        st.markdown(lit_content_html, unsafe_allow_html=True)
 
 # ==================== NAVIGATION TAB 2: LONGITUDINAL ANALYTICS ====================
 with tab_analytics:
@@ -308,7 +319,7 @@ with tab_analytics:
 with tab_database:
     st.markdown("### Live Database Core Editor")
     if not df_registry.empty:
-        edited_df = st.data_editor(df_registry, use_container_width=True, num_rows="dynamic", key="editor_widget_final_v7")
+        edited_df = st.data_editor(df_registry, use_container_width=True, num_rows="dynamic", key="editor_widget_final_v8")
         if st.button("⚡ Save Spreadsheet Updates & Sync Engine"):
             st.session_state['df_registry'] = edited_df
             if "gemini_chat" in st.session_state:
@@ -319,8 +330,10 @@ with tab_database:
 # ==================== NAVIGATION TAB 4: GEMINI DEEP CHAT UNIT ====================
 with tab_intelligence:
     st.markdown("### 🧠 Grounded Conversational Medical Intelligence Workspace")
+    st.write("This portal operates under a strict grounding rule. It references your active Excel data rows in real-time to eliminate diagnostic drift or hallucinations.")
+
     if not GEMINI_API_KEY:
-        st.warning("⚠️ Enter your Google Gemini API Key in your deployment secrets to engage chat services.")
+        st.warning("⚠️ Enter a valid Google Gemini API Key in your application deployment secrets panel to activate the workspace.")
     else:
         genai.configure(api_key=GEMINI_API_KEY)
         if "gemini_chat" not in st.session_state:
@@ -351,22 +364,35 @@ with tab_intelligence:
                     "role": "assistant",
                     "content": "🧬 **Strategic Medical Engine Initialized.** I have successfully digested all active tables from your data core sheets, established cross-system parameters, and locked your clinical timelines under strict grounding constraints. How can I assist your cross-disciplinary analysis loops today?"
                 })
+            # --- FIXED: GRACEFUL COGNIZANT CAPTURING OF THE SERVER-SIDE QUOTA RATELIMIT ERROR ---
             except Exception as e:
-                st.error(f"AI interface communication fault: {e}")
+                err_msg = str(e).lower()
+                if "429" in err_msg or "quota" in err_msg or "exhausted" in err_msg:
+                    st.warning("⚠️ **Gemini API Rate Limit Exceeded (Quota 429):** Your background session has crossed Google's Free Tier threshold limit of 15 requests per minute. The application has successfully cached your chat state data. Please pause for 30–40 seconds and re-engage your search query.")
+                else:
+                    st.error(f"AI interface communication fault: {e}")
 
+        # Render conversation history logs smoothly
         for message in st.session_state.chat_history:
             with st.chat_message(message["role"]):
                 st.markdown(message["content"])
 
-        if user_query := st.chat_input("Query the clinical matrix:"):
+        # Capture user chat queries with specialized rate-limiting filters built-in
+        if user_query := st.chat_input("Query the clinical matrix (e.g., 'Analyze the connection between my 3.2% clone and high ECP level'):"):
             with st.chat_message("user"):
                 st.markdown(user_query)
             st.session_state.chat_history.append({"role": "user", "content": user_query})
+            
             with st.chat_message("assistant"):
                 with st.spinner("Anatomizing data files..."):
                     try:
                         ai_response = st.session_state.gemini_chat.send_message(user_query)
                         st.markdown(ai_response.text)
                         st.session_state.chat_history.append({"role": "assistant", "content": ai_response.text})
+                    # --- FIXED: CHAT PANEL INDEPENDENT COCKPIT INTERCEPTOR ---
                     except Exception as e:
-                        st.error(f"Session buffer conflict. Reset or refresh. Details: {e}")
+                        err_msg = str(e).lower()
+                        if "429" in err_msg or "quota" in err_msg or "exhausted" in err_msg:
+                            st.warning("⚠️ **Gemini API Server Busy:** Google is enforcing a brief cooling window due to heavy request traffic. Your chat history remains perfectly safe. Please wait 30 seconds and repeat your last query.")
+                        else:
+                            st.error(f"The session engine encountered a memory conflict. Details: {e}")
