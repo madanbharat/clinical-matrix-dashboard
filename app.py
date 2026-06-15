@@ -10,31 +10,30 @@ GEMINI_API_KEY = st.secrets.get("GEMINI_API_KEY", "")
 # App Presentation Architecture
 st.set_page_config(page_title="Case Matrix Engine", page_icon="🧬", layout="wide")
 
-# --- STEP 1: INITIALIZE DREARY ALL AVAILABLE CASE DATA POINTS ---
-# Storing the entire lab ecosystem in state memory for live editing
+# --- STEP 1: INITIALIZE ALL AVAILABLE CASE DATA POINTS WITH VALID PYTHON KEYS ---
 metrics_data = {
-    "Vitamin B12 (pg/mL)": {"val": 177.0, "status": "Low / Critical", "type": "Abnormal"},
-    "Homocysteine (µmol/L)": {"val": 20.7, "status": "High Risk", "type": "Abnormal"},
-    "ECP Level (µg/L)": {"val": 48.4, "status": "Severe Degranulation", "type": "Abnormal"},
-    "CD4+CD7- T-Cell %": {"val": 3.2, "status": "Clonal Suspect", "type": "Abnormal"},
-    "CD4/CD8 Ratio": {"val": 1.14, "status": "Low / Abnormal", "type": "Abnormal"},
-    "Urine Specific Gravity": {"val": 1.003, "status": "Hypotonic Dilute", "type": "Abnormal"},
-    "24h Urine Volume (L)": {"val": 4.0, "status": "Polyuria Flux", "type": "Abnormal"},
-    "LDL Cholesterol (mg/dL)": {"val": 169.0, "status": "Elevated Atherogenic", "type": "Abnormal"},
-    "ESR (mm/h)": {"val": 25.0, "status": "Inflammatory Acceleration", "type": "Abnormal"},
-    "CPK Muscle Enzyme (U/L)": {"val": 381.0, "status": "Myofascial Strain", "type": "Abnormal"},
-    "CRP (mg/L)": {"val": 2.37, "status": "Normal Range", "type": "Normal"},
-    "Total IgE (kUA/L)": {"val": 31.0, "status": "Normal (Non-Allergic)", "type": "Normal"},
-    "Tryptase (ng/mL)": {"val": 5.0, "status": "Normal (Non-Mastocytosis)", "type": "Normal"},
-    "Leucocytes (WBC Pool G/l)": {"val": 7.16, "status": "Normal Baseline Pool", "type": "Normal"},
-    "Absolute Lymphocytes (G/l)": {"val": 1.905, "status": "Normal Homeostasis", "type": "Normal"},
-    "Absolute Blood Eosinophils (G/l)": {"val": 0.62, "status": "Borderline Baseline", "type": "Normal"}
+    "Vitamin B12 (pg/mL)": {"val": 177.0, "key": "vitamin_b12", "status": "Low / Critical", "type": "Abnormal"},
+    "Homocysteine (µmol/L)": {"val": 20.7, "key": "homocysteine", "status": "High Risk", "type": "Abnormal"},
+    "ECP Level (µg/L)": {"val": 48.4, "key": "ecp_level", "status": "Severe Degranulation", "type": "Abnormal"},
+    "CD4+CD7- T-Cell %": {"val": 3.2, "key": "cd4_cd7_tcell", "status": "Clonal Suspect", "type": "Abnormal"},
+    "CD4/CD8 Ratio": {"val": 1.14, "key": "cd4_cd8_ratio", "status": "Low / Abnormal", "type": "Abnormal"},
+    "Urine Specific Gravity": {"val": 1.003, "key": "urine_specific_gravity", "status": "Hypotonic Dilute", "type": "Abnormal"},
+    "24h Urine Volume (L)": {"val": 4.0, "key": "urine_volume_24h", "status": "Polyuria Flux", "type": "Abnormal"},
+    "LDL Cholesterol (mg/dL)": {"val": 169.0, "key": "ldl_cholesterol", "status": "Elevated Atherogenic", "type": "Abnormal"},
+    "ESR (mm/h)": {"val": 25.0, "key": "esr", "status": "Inflammatory Acceleration", "type": "Abnormal"},
+    "CPK Muscle Enzyme (U/L)": {"val": 381.0, "key": "cpk_muscle_enzyme", "status": "Myofascial Strain", "type": "Abnormal"},
+    "CRP (mg/L)": {"val": 2.37, "key": "crp", "status": "Normal Range", "type": "Normal"},
+    "Total IgE (kUA/L)": {"val": 31.0, "key": "total_ige", "status": "Normal (Non-Allergic)", "type": "Normal"},
+    "Tryptase (ng/mL)": {"val": 5.0, "key": "tryptase", "status": "Normal (Non-Mastocytosis)", "type": "Normal"},
+    "Leucocytes (WBC Pool G/l)": {"val": 7.16, "key": "leucocytes", "status": "Normal Baseline Pool", "type": "Normal"},
+    "Absolute Lymphocytes (G/l)": {"val": 1.905, "key": "absolute_lymphocytes", "status": "Normal Homeostasis", "type": "Normal"},
+    "Absolute Blood Eosinophils (G/l)": {"val": 0.62, "key": "absolute_blood_eosinophils", "status": "Borderline Baseline", "type": "Normal"}
 }
 
-for key, info in metrics_data.items():
-    state_key = key.replace(" ", "_").lower().split("(")[0].strip("_")
-    if state_key not in st.session_state:
-        st.session_state[state_key] = info["val"]
+# Safely seed session memory loops using explicitly verified string keys
+for name, info in metrics_data.items():
+    if info["key"] not in st.session_state:
+        st.session_state[info["key"]] = info["val"]
 
 # High-End Dark/Light Aesthetic Theme Injector
 st.markdown("""
@@ -54,39 +53,46 @@ st.markdown("<div class='main-header'>🧬 Case Matrix Ecosystem</div>", unsafe_
 st.markdown("<div class='sub-header'>Systemic Multi-Engine Research, Mapping, & Clinical Intel Control Panel</div>", unsafe_allow_html=True)
 st.markdown("---")
 
-# --- STEP 2: SIDEBAR LAB REGISTRY EDITOR ---
+# --- STEP 2: SIDEBAR LAB REGISTRY EDITOR WITH STRUCTURALLY CLEAN ACCESSORS ---
 st.sidebar.header("⚙️ Comprehensive Lab Registry")
-st.sidebar.write("Update hardcoded parameters inside the baseline system:")
+st.sidebar.write("Update parameters inside the baseline system:")
 
 with st.sidebar.expander("🛠️ Edit Data Repository Fields", expanded=False):
-    edit_b12 = st.number_input("Vitamin B12:", value=st.session_state.vitamin_b12, step=1.0)
-    edit_homo = st.number_input("Homocysteine:", value=st.session_state.homocysteine, step=0.1)
-    edit_ecp = st.number_input("ECP Level:", value=st.session_state.ecp_level, step=0.1)
-    edit_tcell = st.number_input("CD4+CD7- T-Cell %:", value=st.session_state.cd4+cd7-_t-cell, step=0.1)
-    edit_ratio = st.number_input("CD4/CD8 Ratio:", value=st.session_state.cd4/cd8_ratio, step=0.01)
-    edit_sg = st.number_input("Urine Specific Gravity:", value=st.session_state.urine_specific_gravity, format="%.3f", step=0.001)
-    edit_uvol = st.number_input("24h Urine Volume:", value=st.session_state.24h_urine_volume, step=0.1)
-    edit_ldl = st.number_input("LDL Cholesterol:", value=st.session_state.ldl_cholesterol, step=1.0)
-    edit_esr = st.number_input("ESR Rate:", value=st.session_state.esr, step=1.0)
-    edit_cpk = st.number_input("CPK Muscle Enzyme:", value=st.session_state.cpk_muscle_enzyme, step=1.0)
-    edit_crp = st.number_input("CRP Rate:", value=st.session_state.crp, step=0.1)
-    edit_ige = st.number_input("Total IgE:", value=st.session_state.total_ige, step=1.0)
-    edit_tryp = st.number_input("Tryptase:", value=st.session_state.tryptase, step=0.1)
+    edit_b12 = st.number_input("Vitamin B12 (pg/mL):", value=float(st.session_state.vitamin_b12), step=1.0)
+    edit_homo = st.number_input("Homocysteine (µmol/L):", value=float(st.session_state.homocysteine), step=0.1)
+    edit_ecp = st.number_input("ECP Level (µg/L):", value=float(st.session_state.ecp_level), step=0.1)
+    edit_tcell = st.number_input("CD4+CD7- T-Cell %:", value=float(st.session_state.cd4_cd7_tcell), step=0.1)
+    edit_ratio = st.number_input("CD4/CD8 Ratio:", value=float(st.session_state.cd4_cd8_ratio), step=0.01)
+    edit_sg = st.number_input("Urine Specific Gravity:", value=float(st.session_state.urine_specific_gravity), format="%.3f", step=0.001)
+    edit_uvol = st.number_input("24h Urine Volume (L):", value=float(st.session_state.urine_volume_24h), step=0.1)
+    edit_ldl = st.number_input("LDL Cholesterol (mg/dL):", value=float(st.session_state.ldl_cholesterol), step=1.0)
+    edit_esr = st.number_input("ESR Rate (mm/h):", value=float(st.session_state.esr), step=1.0)
+    edit_cpk = st.number_input("CPK Muscle Enzyme (U/L):", value=float(st.session_state.cpk_muscle_enzyme), step=1.0)
+    edit_crp = st.number_input("CRP Rate (mg/L):", value=float(st.session_state.crp), step=0.1)
+    edit_ige = st.number_input("Total IgE (kUA/L):", value=float(st.session_state.total_ige), step=1.0)
+    edit_tryp = st.number_input("Tryptase (ng/mL):", value=float(st.session_state.tryptase), step=0.1)
+    edit_leuc = st.number_input("Leucocytes (G/l):", value=float(st.session_state.leucocytes), step=0.1)
+    edit_lymph = st.number_input("Absolute Lymphocytes (G/l):", value=float(st.session_state.absolute_lymphocytes), step=0.1)
+    edit_eos = st.number_input("Absolute Blood Eosinophils (G/l):", value=float(st.session_state.absolute_blood_eosinophils), step=0.1)
 
 if st.sidebar.button("💾 Apply Changes & Re-prime AI"):
     st.session_state.vitamin_b12 = edit_b12
     st.session_state.homocysteine = edit_homo
     st.session_state.ecp_level = edit_ecp
-    st.session_state.cd4+cd7-_t-cell = edit_tcell
-    st.session_state.cd4/cd8_ratio = edit_ratio
+    st.session_state.cd4_cd7_tcell = edit_tcell
+    st.session_state.cd4_cd8_ratio = edit_ratio
     st.session_state.urine_specific_gravity = edit_sg
-    st.session_state.24h_urine_volume = edit_uvol
+    st.session_state.urine_volume_24h = edit_uvol
     st.session_state.ldl_cholesterol = edit_ldl
     st.session_state.esr = edit_esr
     st.session_state.cpk_muscle_enzyme = edit_cpk
     st.session_state.crp = edit_crp
     st.session_state.total_ige = edit_ige
     st.session_state.tryptase = edit_tryp
+    st.session_state.leucocytes = edit_leuc
+    st.session_state.absolute_lymphocytes = edit_lymph
+    st.session_state.absolute_blood_eosinophils = edit_eos
+    
     if "gemini_chat" in st.session_state:
         del st.session_state.gemini_chat
     st.toast("System master memory updated!", icon="💾")
@@ -103,19 +109,18 @@ selected_display_metrics = st.multiselect(
     default=default_abnormal_labels
 )
 
-# Render Graphics and Metric Cards dynamically based on user filters
 if not selected_display_metrics:
     st.info("💡 Select at least one marker from the menu above to compute visual data streams.")
 else:
-    # Build Map
+    # Build secure programmatic data mapper using safe internal keys
     chart_mapping = {
         "Vitamin B12 (pg/mL)": st.session_state.vitamin_b12,
         "Homocysteine (µmol/L)": st.session_state.homocysteine,
         "ECP Level (µg/L)": st.session_state.ecp_level,
-        "CD4+CD7- T-Cell %": st.session_state.cd4+cd7-_t-cell,
-        "CD4/CD8 Ratio": st.session_state.cd4/cd8_ratio,
+        "CD4+CD7- T-Cell %": st.session_state.cd4_cd7_tcell,
+        "CD4/CD8 Ratio": st.session_state.cd4_cd8_ratio,
         "Urine Specific Gravity": st.session_state.urine_specific_gravity,
-        "24h Urine Volume (L)": st.session_state.24h_urine_volume,
+        "24h Urine Volume (L)": st.session_state.urine_volume_24h,
         "LDL Cholesterol (mg/dL)": st.session_state.ldl_cholesterol,
         "ESR (mm/h)": st.session_state.esr,
         "CPK Muscle Enzyme (U/L)": st.session_state.cpk_muscle_enzyme,
@@ -137,13 +142,13 @@ else:
             labels={'x': 'Value Index', 'y': 'Selected Indicators'},
             color=selected_display_metrics, color_discrete_sequence=px.colors.qualitative.Slate
         )
-        fig.update_layout(showlegend=False, height=300, margin=dict(l=20, r=20, t=10, b=10))
+        fig.update_layout(showlegend=False, height=320, margin=dict(l=20, r=20, t=10, b=10))
         st.plotly_chart(fig, use_container_width=True)
         
-        # Render clean grid cards dynamically for selected items
+        # Render dynamic visual grid system for selected items
         card_columns = st.columns(min(len(selected_display_metrics), 4))
         for idx, name in enumerate(selected_display_metrics):
-            col_target = card_columns[idx % 4]
+            col_target = card_columns[idx % min(len(selected_display_metrics), 4)]
             val_current = chart_mapping[name]
             is_abnormal = metrics_data[name]["type"] == "Abnormal"
             bg_style = "critical-bg" if is_abnormal else "stable-bg"
@@ -174,7 +179,6 @@ else:
         st.dataframe(pd.DataFrame(timeline_events), use_container_width=True, hide_index=True)
 
 st.markdown("---")
-st.markdown("<div id='chat-section'></div>", unsafe_allow_html=True)
 st.subheader("💬 Gemini Multi-Disciplinary AI Portal")
 
 # Initialize and establish the Gemini Chat Stream
@@ -190,7 +194,7 @@ else:
             model = genai.GenerativeModel("gemini-2.5-flash")
             st.session_state.gemini_chat = model.start_chat(history=[])
             
-            # THE COMPLETE CLINICAL KNOWLEDGE ENGINE INJECTION BLOCK
+            # --- THE SYSTEM PRIMER USES CLEAN SYSTEM VARIABLES ---
             system_primer = (
                 "MASTER CLINICAL CASE CONTEXT DATA PROTOCOL:\n\n"
                 "1. PATIENT DEMOGRAPHICS & BACKGROUND:\n"
@@ -206,10 +210,10 @@ else:
                 f"- Vitamin B12: {st.session_state.vitamin_b12} pg/mL\n"
                 f"- Homocysteine: {st.session_state.homocysteine} µmol/L\n"
                 f"- Eosinophil Cationic Protein (ECP): {st.session_state.ecp_level} µg/L\n"
-                f"- Aberrant T-Helper Cell Clone (CD3+CD4+CD7-): {st.session_state.cd4+cd7-_t-cell}%\n"
-                f"- CD4/CD8 Ratio: {st.session_state.cd4/cd8_ratio}\n"
+                f"- Aberrant T-Helper Cell Clone (CD3+CD4+CD7-): {st.session_state.cd4_cd7_tcell}%\n"
+                f"- CD4/CD8 Ratio: {st.session_state.cd4_cd8_ratio}\n"
                 f"- Urine Specific Gravity: {st.session_state.urine_specific_gravity}\n"
-                f"- 24h Urine Volume: {st.session_state.24h_urine_volume} L\n"
+                f"- 24h Urine Volume: {st.session_state.urine_volume_24h} L\n"
                 f"- LDL Cholesterol: {st.session_state.ldl_cholesterol} mg/dL\n"
                 f"- ESR Rate: {st.session_state.esr} mm/h\n"
                 f"- CPK Muscle Enzyme: {st.session_state.cpk_muscle_enzyme} U/L\n"
@@ -246,7 +250,7 @@ else:
             )
             st.session_state.gemini_chat.send_message(system_primer)
             
-            # FIX FOR EYE-LINE CONFUSION: Automatically populate an initial response greeting
+            # Auto-populate a clear opening greeting inside the chat window space
             st.session_state.chat_history.append({
                 "role": "assistant", 
                 "content": "👋 **Welcome to the Secure Case Matrix Engine.** I have fully aligned all available clinical data points, genetic histories, parasitic context records, and custom lab filters. The workspace is active and primed under strict grounding constraints. How can I assist you with cross-system data correlation or risk assessment analysis today?"
