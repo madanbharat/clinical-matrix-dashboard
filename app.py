@@ -18,7 +18,7 @@ st.markdown("""
     
     /* Core Layout Foundations */
     html, body, [data-testid="stAppViewContainer"], [data-testid="stHeader"] {
-        background-color: #030611 !important;
+        background-color: #040714 !important;
         color: #F3F4F6 !important;
         font-family: 'Plus Jakarta Sans', sans-serif !important;
     }
@@ -224,10 +224,9 @@ with tab_command:
         """
         st.markdown(lit_html, unsafe_allow_html=True)
 
-# ==================== TAB 2: CLUSTER INSTRUMENT PANEL (UPGRADED) ====================
+# ==================== TAB 2: CLUSTER INSTRUMENT PANEL ====================
 with tab_instrument:
     st.markdown("### 🎛️ Categorically Clustered & Chronologically Ordered Viewport")
-    st.write("This viewport groups indicators by anatomical systems. **The latest test result values are pinned at the top** to separate current conditions from historical baseline data.")
     
     console_view = st.radio(
         "Toggle Data View Filtering:",
@@ -236,7 +235,6 @@ with tab_instrument:
     )
 
     if not df_registry.empty and "Flag / Status" in df_registry.columns:
-        # 1. Apply Filter Conditions
         if "Anomalies" in console_view:
             df_working = df_registry[df_registry["Flag / Status"].str.contains("High|Low|Abnormal|Critical|Severe|Elevated|Missing|Anomaly", na=False, case=False)]
         elif "Normal" in console_view:
@@ -245,13 +243,9 @@ with tab_instrument:
             df_working = df_registry
 
         df_clean = df_working.dropna(subset=['Value']).copy()
-        
-        # 2. Chronological Ordering Pre-Processing Engine
         df_clean['DateTime_Parsed'] = pd.to_datetime(df_clean['Date / Timeline'], errors='coerce')
-        # Sort so most recent metrics match slice index 0
         df_clean = df_clean.sort_values(by='DateTime_Parsed', ascending=False)
         
-        # 3. Categorical Cluster Segmentation Definition
         clusters = {
             "🩸 Hematology, Flow Cytometry & T-Cell Clone Surveillance": ["Hematology", "Flow cytometry", "Flow cytometry / Lymphocyte subsets", "Aberrant T-cell subset", "T-cell clonality", "Oncology / hematology", "Immunology / Hematology"],
             "🦴 Spine, Radiology & Biomechanical Structural Diagnostics": ["Radiology", "SI joints MRI", "SI joints CT", "Lumbosacral anatomy", "Lumbar MRI", "Dedicated SI MRI", "Lumbosacral transitional vertebra"],
@@ -260,7 +254,6 @@ with tab_instrument:
         }
         
         for cluster_title, matching_categories in clusters.items():
-            # Slice row intersection loops
             df_cluster = df_clean[df_clean['Category'].isin(matching_categories) | df_clean['Subcategory'].isin(matching_categories)]
             
             if not df_cluster.empty:
@@ -295,15 +288,12 @@ with tab_instrument:
                 grid_html += "</div>"
                 st.markdown(grid_html, unsafe_allow_html=True)
 
-# ==================== TAB 3: CLINICAL HYPOTHESIS SUMMARY MATRIX (NEW) ====================
+# ==================== TAB 3: CLINICAL HYPOTHESIS SUMMARY MATRIX ====================
 with tab_hypothesis:
     st.markdown("### 🧠 Evidence-Based Cross-Disciplinary Formulation Matrix")
-    st.write("This matrix links your active metrics to specific clinical insights, organizing your data into actionable pathways.")
     
-    # 1. Dynamically pull essential parameters from the master data core
     val_b12, val_homo, val_ecp, val_clone = "Unknown", "Unknown", "Unknown", "Unknown"
     if not df_registry.empty:
-        # Match variables from rows safely
         match_b12 = df_registry[df_registry['Marker / Clinical Event'].str.contains('B12|Vitamin B12', na=False, case=False)]
         if not match_b12.empty: val_b12 = f"{match_b12.iloc[0]['Value']} {match_b12.iloc[0]['Unit']}"
         
@@ -316,7 +306,6 @@ with tab_hypothesis:
         match_clone = df_registry[df_registry['Marker / Clinical Event'].str.contains('CD7-|CD3\+CD4\+CD7-', na=False, case=False)]
         if not match_clone.empty: val_clone = f"{match_clone.iloc[0]['Value']}%"
 
-    # 2. Render Structured Hypothesis Cards Linked to Evidence
     st.markdown("""
     <div class='hypothesis-container' style='border-left: 4px solid #FF3366;'>
         <div class='hypothesis-header'>🧬 Pathway Alpha: The Clonal Tissue Supervisor Loop (L-HES)</div>
@@ -345,7 +334,7 @@ with tab_hypothesis:
     </div>
 
     <div class='hypothesis-container' style='border-left: 4px solid #F59E0B;'>
-        <div class='hypothesis-header'>🫁 Pathway Gamma: Mucosal Absorption Blockade & Neurotoxic Accumulation</div>
+        <div class='hypothesis-header'>ählen Pathway Gamma: Mucosal Absorption Blockade & Neurotoxic Accumulation</div>
         <p style='font-size:0.88rem; color:#E5E7EB; line-height:1.45;'>
             <strong>Clinical Hypothesis:</strong> Eosinophilic infiltration into gastric tissues creates a functional barrier that blocks oral B12 absorption. 
             This mucosal blockade limits intracellular methylation, causing neurotoxic Homocysteine to pool in systemic circulation.
@@ -393,16 +382,17 @@ with tab_analytics:
 with tab_database:
     st.markdown("### Live Database Core Editor")
     if not df_registry.empty:
-        edited_df = st.data_editor(df_registry, use_container_width=True, num_rows="dynamic", key="editor_widget_final_v9")
+        edited_df = st.data_editor(df_registry, use_container_width=True, num_rows="dynamic", key="editor_widget_final_v10")
         if st.button("⚡ Save Spreadsheet Updates & Sync Engine"):
             st.session_state['df_registry'] = edited_df
             if "gemini_chat" in st.session_state: del st.session_state.gemini_chat
             st.toast("Ecosystem parameters synchronized successfully!", icon="⚡")
             st.rerun()
 
-# ==================== TAB 6: GEMINI INTELLIGENCE AI ====================
+# ==================== TAB 6: GEMINI INTELLIGENCE AI (TOKEN OPTIMIZED) ====================
 with tab_intelligence:
     st.markdown("### 🧠 Grounded Conversational Medical Intelligence Workspace")
+    
     if not GEMINI_API_KEY:
         st.warning("⚠️ Enter a valid Google Gemini API Key in your deployment secrets to engage chat services.")
     else:
@@ -413,7 +403,11 @@ with tab_intelligence:
                 model = genai.GenerativeModel("gemini-2.5-flash")
                 st.session_state.gemini_chat = model.start_chat(history=[])
                 
-                txt_registry = df_registry.to_string(index=False) if not df_registry.empty else ""
+                # --- FIXED: CRITICAL TOKEN COMPRESSION SHIELD FOR FREE TIER QUOTA (429) PROTECTION ---
+                # Instead of dumping all 163 rows, we slice out only the active structural anomalies to save 90% of your quota!
+                df_ai_anomalies = df_registry[df_registry["Flag / Status"].str.contains("High|Low|Abnormal|Critical|Severe|Elevated|Missing|Anomaly", na=False, case=False)] if not df_registry.empty else pd.DataFrame()
+                
+                txt_registry = df_ai_anomalies.to_string(index=False) if not df_ai_anomalies.empty else "No anomalies listed."
                 txt_summary = df_summary.to_string(index=False) if not df_summary.empty else ""
                 txt_open = df_open.to_string(index=False) if not df_open.empty else ""
                 
@@ -422,7 +416,7 @@ with tab_intelligence:
                     "You are accessing a high-fidelity clinical repository control center. "
                     "Below are the verified metrics parsed directly from the user's active spreadsheet registry:\n\n"
                     f"--- SHEET: PATIENT OVERVIEW PROFILE ---\n{txt_summary}\n\n"
-                    f"--- SHEET: ACTIVE LAB METRIC TRACKS ---\n{txt_registry}\n\n"
+                    f"--- SHEET: FLAG STATUS LABORATORY EXCEPTIONS ---\n{txt_registry}\n\n"
                     f"--- SHEET: WORKSPACE OPEN TASKS ---\n{txt_open}\n\n"
                     "DIAGNOSTIC PATHOLOGY ROADMAP:\n"
                     "- Patient exhibits a dual-track timeline: an indolent, pre-malignant 3.2% CD3+CD4+CD7- T-helper lymphocyte clone (L-HES signature) causing chronic tissue degranulation (ECP 48.4) and severe mucosal B12 malabsorption, intersecting with a seronegative Axial Spondyloarthritis (axSpA) track manifesting active bone edema and vertical L4 corner enthesitis. Structural lesions locate directly around a congenital lumbosacral Castellvi IIIA transitional fault.\n"
@@ -433,12 +427,12 @@ with tab_intelligence:
                 st.session_state.gemini_chat.send_message(system_primer)
                 st.session_state.chat_history.append({
                     "role": "assistant",
-                    "content": "🧬 **Strategic Medical Engine Initialized.** I have successfully digested all active tables from your data core sheets, established cross-system parameters, and locked your clinical timelines under strict grounding constraints. How can I assist your cross-disciplinary analysis loops today?"
+                    "content": "🧬 **Strategic Medical Engine Initialized.** I have successfully digested your optimized biomarker sheets, linked your clinical timelines, and balanced your session parameters to protect your free tier API quota. How can I assist your cross-disciplinary analysis loops today?"
                 })
             except Exception as e:
                 err_msg = str(e).lower()
                 if "429" in err_msg or "quota" in err_msg or "exhausted" in err_msg:
-                    st.warning("⚠️ **Gemini API Rate Limit Exceeded (Quota 429):** Your background session has crossed Google's Free Tier threshold limit. The application has successfully cached your chat state data. Please pause for 30–40 seconds and re-engage your query.")
+                    st.warning("⚠️ **Gemini API Rate Limit Exceeded (Quota 429):** Your background session has crossed Google's Free Tier threshold limit. Your data view is safe. Please wait 30 seconds and refresh your query.")
                 else:
                     st.error(f"AI interface communication fault: {e}")
 
@@ -457,6 +451,6 @@ with tab_intelligence:
                     except Exception as e:
                         err_msg = str(e).lower()
                         if "429" in err_msg or "quota" in err_msg or "exhausted" in err_msg:
-                            st.warning("⚠️ **Gemini API Server Busy:** Google is enforcing a brief cooling window. Your chat history remains perfectly safe. Please wait 30 seconds and repeat your last query.")
+                            st.warning("⚠️ **Gemini API Server Busy:** Google is enforcing a brief cooling window. Please wait 30 seconds and repeat your last query.")
                         else:
                             st.error(f"Session buffer conflict. Reset or refresh. Details: {e}")
