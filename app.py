@@ -104,7 +104,7 @@ else:
     if "chat_history" not in st.session_state:
         st.session_state.chat_history = []
         # Pre-load complete case context directly into Gemini's active memory pool
-        model = genai.GenerativeModel("gemini-1.5-flash")
+        model = genai.GenerativeModel("gemini-2.5-flash")
         st.session_state.gemini_chat = model.start_chat(history=[])
         
         system_primer = (
