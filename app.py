@@ -18,7 +18,7 @@ st.markdown("""
     
     /* Core Layout Foundations */
     html, body, [data-testid="stAppViewContainer"], [data-testid="stHeader"] {
-        background-color: #040814 !important;
+        background-color: #030712 !important;
         color: #F3F4F6 !important;
         font-family: 'Plus Jakarta Sans', sans-serif !important;
     }
@@ -26,35 +26,51 @@ st.markdown("""
     /* Header Console elements */
     .cockpit-title { font-size: 2.3rem; font-weight: 800; color: #FFFFFF; letter-spacing: -1px; margin-bottom: 2px; }
     .cockpit-subtitle { font-size: 0.85rem; color: #00F2FE; font-weight: 600; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 25px; }
-    .panel-header { font-size: 1rem; font-weight: 700; color: #FFFFFF; text-transform: uppercase; letter-spacing: 1px; margin-top: 15px; margin-bottom: 15px; }
+    .panel-header { font-size: 1rem; font-weight: 700; color: #FFFFFF; text-transform: uppercase; letter-spacing: 1px; margin-top: 20px; margin-bottom: 15px; }
+    
+    /* PURE CSS FLEXBOX GRID ARCHITECTURE - FIXES GHOST RECTANGLES */
+    .cockpit-flex-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 14px;
+        width: 100%;
+    }
     
     /* Compact Instruments Matrix Cards */
     .command-card {
-        background: linear-gradient(135deg, rgba(11, 20, 50, 0.7) 0%, rgba(18, 32, 77, 0.4) 100%);
+        flex: 1 1 calc(25% - 14px);
+        min-width: 280px;
+        max-width: calc(25% - 14px);
+        background: linear-gradient(135deg, rgba(15, 23, 42, 0.8) 0%, rgba(30, 41, 59, 0.4) 100%);
         border: 1px solid rgba(255, 255, 255, 0.06);
-        border-radius: 10px;
-        padding: 12px 14px;
-        margin-bottom: 12px;
-        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+        border-radius: 12px;
+        padding: 16px;
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+        transition: border 0.3s ease;
     }
-    .card-crit { border-top: 3px solid #FF3366 !important; background: linear-gradient(135deg, rgba(40, 12, 24, 0.7) 0%, rgba(11, 20, 50, 0.4) 100%); }
+    .command-card:hover { border: 1px solid rgba(0, 242, 254, 0.25); }
+    .card-crit { border-top: 3px solid #EF4444 !important; background: linear-gradient(135deg, rgba(30, 10, 18, 0.7) 0%, rgba(15, 23, 42, 0.4) 100%); }
     .card-normal { border-top: 3px solid #00F2FE !important; }
     
     /* Condensed Typography Layout */
-    .metric-label { font-size: 0.72rem; text-transform: uppercase; color: #9CA3AF; font-weight: 600; letter-spacing: 0.3px; line-height: 1.3; margin-bottom: 4px; }
-    .metric-val { font-size: 1.55rem; font-weight: 700; color: #FFFFFF; font-family: 'JetBrains Mono', monospace; }
-    .metric-unit { font-size: 0.75rem; color: #00F2FE; font-weight: 500; margin-left: 1px; }
-    .metric-desc { font-size: 0.72rem; color: #9CA3AF; margin-top: 6px; padding-top: 6px; border-top: 1px solid rgba(255,255,255,0.05); line-height: 1.35; }
+    .metric-label { font-size: 0.72rem; text-transform: uppercase; color: #9CA3AF; font-weight: 600; letter-spacing: 0.3px; line-height: 1.35; margin-bottom: 6px; }
+    .metric-val { font-size: 1.65rem; font-weight: 700; color: #FFFFFF; font-family: 'JetBrains Mono', monospace; }
+    .metric-unit { font-size: 0.78rem; color: #00F2FE; font-weight: 500; margin-left: 2px; }
+    .metric-desc { font-size: 0.74rem; color: #9CA3AF; margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.06); line-height: 1.4; text-align: justify; }
     
     /* Status Badges */
-    .alert-badge { padding: 2px 8px; border-radius: 4px; font-size: 0.62rem; font-weight: 700; display: inline-block; margin-top: 6px; text-transform: uppercase; }
-    .badge-critical { background-color: rgba(255, 51, 102, 0.12); color: #FF4D7D; border: 1px solid rgba(255, 51, 102, 0.25); }
+    .alert-badge { padding: 3px 8px; border-radius: 6px; font-size: 0.62rem; font-weight: 700; display: inline-block; margin-top: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .badge-critical { background-color: rgba(239, 68, 68, 0.12); color: #F87171; border: 1px solid rgba(239, 68, 68, 0.25); }
     .badge-baseline { background-color: rgba(0, 242, 254, 0.1); color: #00F2FE; border: 1px solid rgba(0, 242, 254, 0.2); }
     
-    /* Tabs Overhaul */
-    .stTabs [data-baseweb="tab-list"] { gap: 6px; background-color: #0B1432; padding: 4px; border-radius: 10px; }
-    .stTabs [data-baseweb="tab"] { color: #9CA3AF; font-weight: 600; border-radius: 6px; padding: 8px 18px; font-size: 0.85rem; }
-    .stTabs [aria-selected="true"] { background-color: #00F2FE !important; color: #040814 !important; font-weight: 700; }
+    /* Mobile/Responsive scaling rules */
+    @media (max-width: 1200px) { .command-card { flex: 1 1 calc(33.33% - 14px); max-width: calc(33.33% - 14px); } }
+    @media (max-width: 900px) { .command-card { flex: 1 1 calc(50% - 14px); max-width: calc(50% - 14px); } }
+    @media (max-width: 600px) { .command-card { flex: 1 1 100%; max-width: 100%; } }
 </style>
 """, unsafe_allow_html=True)
 
@@ -81,7 +97,7 @@ if 'data_initialized' not in st.session_state:
     if os.path.exists(EXCEL_FILE):
         load_excel_matrices(EXCEL_FILE)
     else:
-        st.markdown("<div class='command-card'>", unsafe_allow_html=True)
+        st.markdown("<div class='command-card card-normal'>", unsafe_allow_html=True)
         st.markdown("### 📁 Clinical Knowledge Base Initializer")
         st.write("Please upload your spreadsheet database file (`Master_Clinical_Registry_June_2026.xlsx`) to populate the cockpit panels:")
         uploaded_core = st.file_uploader("Upload Master Excel File Root:", type=["xlsx"])
@@ -96,7 +112,7 @@ df_open = st.session_state.get('df_open', pd.DataFrame())
 df_summary = st.session_state.get('df_summary', pd.DataFrame())
 df_pending = st.session_state.get('df_pending', pd.DataFrame())
 
-# --- STEP 2: RENDER BACKBONE COCKPIT NAVIGATION ---
+# --- STEP 2: RENDER SYSTEM NAVIGATION TAB ARRAY ---
 tab_command, tab_analytics, tab_database, tab_intelligence = st.tabs([
     "🛸 Strategic Command Deck",
     "📈 Longitudinal Analytics",
@@ -110,7 +126,7 @@ with tab_command:
     
     with col_profile:
         st.markdown("<div class='panel-header'>📋 Executive Patient Profile Summary</div>", unsafe_allow_html=True)
-        st.markdown("<div class='command-card' style='min-height: 210px;'>", unsafe_allow_html=True)
+        st.markdown("<div class='command-card' style='min-height: 210px; max-width: 100%; flex: 1;'>", unsafe_allow_html=True)
         if not df_summary.empty:
             for idx, row in df_summary.dropna(subset=[df_summary.columns[0], df_summary.columns[1]], how='any').iterrows():
                 lbl = str(row.iloc[0]).strip()
@@ -120,44 +136,48 @@ with tab_command:
         st.markdown("</div>", unsafe_allow_html=True)
         
     with col_alerts:
-        st.markdown("<div class='panel-header' style='color:#FF3366;'>⚡ Priority Action Gaps</div>", unsafe_allow_html=True)
-        st.markdown("<div class='command-card' style='min-height: 210px; overflow-y: auto;'>", unsafe_allow_html=True)
+        st.markdown("<div class='panel-header' style='color:#EF4444;'>⚡ Priority Action Gaps</div>", unsafe_allow_html=True)
+        st.markdown("<div class='command-card' style='min-height: 210px; max-width: 100%; flex: 1; overflow-y: auto;'>", unsafe_allow_html=True)
         if not df_open.empty:
             col_target_issue = 'Issue' if 'Issue' in df_open.columns else df_open.columns[2]
             for _, row in df_open.iterrows():
-                st.markdown(f"<div style='padding: 4px 8px; background: rgba(255,51,102,0.06); border-left: 3px solid #FF3366; border-radius:4px; margin-bottom:6px; font-size:0.8rem; color:#F3F4F6;'>{row[col_target_issue]}</div>", unsafe_allow_html=True)
+                st.markdown(f"<div style='padding: 4px 8px; background: rgba(239,68,68,0.06); border-left: 3px solid #EF4444; border-radius:4px; margin-bottom:6px; font-size:0.8rem; color:#F3F4F6;'>{row[col_target_issue]}</div>", unsafe_allow_html=True)
         st.markdown("</div>", unsafe_allow_html=True)
 
-    # --- THE FIXED HORIZONTAL FLEX GRID PATTERN ---
+    # --- THE COMPACT COCKPIT INSTRUMENT GRID PANEL ---
     st.markdown("<div class='panel-header'>🚨 Flagged System Anomalies & Laboratory Exceptions</div>", unsafe_allow_html=True)
     if not df_registry.empty and "Flag / Status" in df_registry.columns:
         
-        # 1. Isolate row markers that match out-of-range parameters
-        df_anomalies = df_registry[df_registry["Flag / Status"].str.contains("High|Low|Abnormal|Critical|Severe|Elevated|Missing|Anomaly", na=False, case=False)].dropna(subset=['Value']).reset_index()
+        # Isolate out-of-range indicators from spreadsheet rows
+        df_anomalies = df_registry[df_registry["Flag / Status"].str.contains("High|Low|Abnormal|Critical|Severe|Elevated|Missing|Anomaly", na=False, case=False)].dropna(subset=['Value'])
         
         if not df_anomalies.empty:
-            # i steps through the array in fixed jumps of 4 items at a time
-            for i in range(0, len(df_anomalies), 4):
-                chunk = df_anomalies.iloc[i:i+4]
-                row_columns = st.columns(4) # Force opens a clean horizontal grid row
+            # Build the pure HTML container block string
+            grid_html = "<div class='cockpit-flex-grid'>"
+            
+            for _, row in df_anomalies.iterrows():
+                ctx_flag = str(row['Flag / Status']).strip()
+                unit = str(row['Unit']).strip() if (pd.notna(row['Unit']) and str(row['Unit']).lower() != 'nan') else ''
+                desc = str(row['Clinical Context / Interpretation (careful)']).strip() if pd.notna(row['Clinical Context / Interpretation (careful)']) else ''
                 
-                for idx, (_, row) in enumerate(chunk.iterrows()):
-                    ctx_flag = str(row['Flag / Status']).strip()
-                    unit = row['Unit'] if pd.notna(row['Unit']) else ''
-                    desc = str(row['Clinical Context / Interpretation (careful)']).strip() if pd.notna(row['Clinical Context / Interpretation (careful)']) else ''
-                    
-                    card_html = f"""
-                    <div class='command-card card-crit'>
+                # Append card layouts into the string core
+                grid_html += f"""
+                <div class='command-card card-crit'>
+                    <div>
                         <div class='metric-label'>{row['Marker / Clinical Event']}</div>
                         <div class='metric-val'>{row['Value']}<span class='metric-unit'> {unit}</span></div>
                         <div class='alert-badge badge-critical'>{ctx_flag}</div>
-                    """
-                    if desc and desc.lower() != 'nan' and desc != '':
-                        card_html += f"<div class='metric-desc'>{desc}</div>"
-                    card_html += "</div>"
-                    
-                    with row_columns[idx]:
-                        st.markdown(card_html, unsafe_allow_html=True)
+                    </div>
+                """
+                if desc and desc.lower() != 'nan' and desc != '':
+                    grid_html += f"<div class='metric-desc'>{desc}</div>"
+                
+                grid_html += "</div>"
+                
+            grid_html += "</div>"
+            
+            # Direct single execution pipeline call to Streamlit rendering engine
+            st.markdown(grid_html, unsafe_allow_html=True)
         else:
             st.success("All system biological biomarkers currently verified inside baseline control metrics.")
 
@@ -165,12 +185,12 @@ with tab_command:
     st.markdown("<div class='panel-header'>💊 Strategies & Screenings</div>", unsafe_allow_html=True)
     col_tx, col_pd = st.columns(2)
     with col_tx:
-        st.markdown("<div class='command-card' style='min-height:180px;'>", unsafe_allow_html=True)
+        st.markdown("<div class='command-card card-normal' style='min-height:180px; max-width: 100%; flex: 1;'>", unsafe_allow_html=True)
         st.write("🏋️‍♂️ **Active Treatment / Exercise Tracking Loops**")
-        st.markdown("<div style='font-size:0.85rem; line-height:1.4;'>• <strong>Parenteral Repletion Regimen:</strong> Bypassing eosinophilic mucosal blocks.<br>• <strong>Methylation Support:</strong> Lowering high systemic neurotoxic Homocysteine volumes.<br>• <strong>Sacroiliac Joint Decompression:</strong> Targeted routines to unburden Castellvi IIIA segment mechanics.</div>", unsafe_allow_html=True)
+        st.markdown("<div style='font-size:0.85rem; line-height:1.45;'>• <strong>Parenteral Repletion Regimen:</strong> Bypassing eosinophilic mucosal blocks.<br>• <strong>Methylation Support:</strong> Lowering high systemic neurotoxic Homocysteine volumes.<br>• <strong>Sacroiliac Joint Decompression:</strong> Targeted routines to unburden Castellvi IIIA segment mechanics.</div>", unsafe_allow_html=True)
         st.markdown("</div>", unsafe_allow_html=True)
     with col_pd:
-        st.markdown("<div class='command-card' style='min-height:180px;'>", unsafe_allow_html=True)
+        st.markdown("<div class='command-card card-normal' style='min-height:180px; max-width: 100%; flex: 1;'>", unsafe_allow_html=True)
         st.write("🔬 **Pending / Ordered Specialized Screenings (Dr. Domingues)**")
         if not df_pending.empty:
             st.dataframe(df_pending, use_container_width=True, hide_index=True)
@@ -213,7 +233,7 @@ with tab_analytics:
 with tab_database:
     st.markdown("### Live Database Core Editor")
     if not df_registry.empty:
-        edited_df = st.data_editor(df_registry, use_container_width=True, num_rows="dynamic", key="editor_widget_final_v4")
+        edited_df = st.data_editor(df_registry, use_container_width=True, num_rows="dynamic", key="editor_widget_final_v5")
         if st.button("⚡ Save Spreadsheet Updates & Sync Engine"):
             st.session_state['df_registry'] = edited_df
             if "gemini_chat" in st.session_state:
