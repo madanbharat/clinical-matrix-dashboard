@@ -66,7 +66,7 @@ st.markdown("""
     .metric-desc { font-size: 0.72rem; color: #9CA3AF; margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.06); line-height: 1.35; text-align: justify; }
     
     /* Micro Status Badges */
-    .alert-badge { padding: 2px 6px; border-radius: 4px; font-size: 0.6rem; font-weight: 700; display: inline-block; text-transform: uppercase; margin-top: 6px; letter-spacing: 0.5px; }
+    .alert-badge { padding: 2px 6px; border-radius: 4px; font-size: 0.6rem; font-weight: 700; display: inline-block; margin-top: 6px; letter-spacing: 0.5px; }
     .badge-critical { background-color: rgba(255, 51, 102, 0.12); color: #FF4D7D; border: 1px solid rgba(255, 51, 102, 0.25); }
     .badge-baseline { background-color: rgba(0, 242, 254, 0.1); color: #00F2FE; border: 1px solid rgba(0, 242, 254, 0.2); }
     
@@ -129,25 +129,29 @@ with tab_command:
     
     with col_profile:
         st.markdown("<div class='panel-header'>📋 Executive Patient Profile Summary</div>", unsafe_allow_html=True)
-        st.markdown("<div class='command-card card-normal' style='min-height: 210px; max-width: 100%; flex: 1;'>", unsafe_allow_html=True)
+        # FIXED: Everything is compiled into one single HTML block to eliminate the ghost layout gap below
+        profile_html = "<div class='command-card card-normal' style='min-height: 210px; max-width: 100%; flex: 1;'>"
         if not df_summary.empty:
             for idx, row in df_summary.dropna(subset=[df_summary.columns[0], df_summary.columns[1]], how='any').iterrows():
                 lbl = str(row.iloc[0]).strip()
                 val = str(row.iloc[1]).strip()
                 if any(x in lbl.lower() for x in ["rows", "priority", "result", "question", "imaging"]):
-                    st.markdown(f"<div style='margin-bottom:6px; font-size:0.85rem;'><strong style='color:#00F2FE;'>{lbl}:</strong> <span style='color:#E5E7EB;'>{val}</span></div>", unsafe_allow_html=True)
-        st.markdown("</div>", unsafe_allow_html=True)
+                    profile_html += f"<div style='margin-bottom:6px; font-size:0.85rem;'><strong style='color:#00F2FE;'>{lbl}:</strong> <span style='color:#E5E7EB;'>{val}</span></div>"
+        profile_html += "</div>"
+        st.markdown(profile_html, unsafe_allow_html=True)
         
     with col_alerts:
         st.markdown("<div class='panel-header' style='color:#EF4444;'>⚡ Priority Action Gaps</div>", unsafe_allow_html=True)
-        st.markdown("<div class='command-card' style='min-height: 210px; max-width: 100%; flex: 1; overflow-y: auto;'>", unsafe_allow_html=True)
+        # FIXED: Unified into one single HTML string block execution 
+        alerts_html = "<div class='command-card' style='min-height: 210px; max-width: 100%; flex: 1; overflow-y: auto;'>"
         if not df_open.empty:
             col_target_issue = 'Issue' if 'Issue' in df_open.columns else df_open.columns[2]
             for _, row in df_open.iterrows():
-                st.markdown(f"<div style='padding: 4px 8px; background: rgba(239,68,68,0.06); border-left: 3px solid #EF4444; border-radius:4px; margin-bottom:6px; font-size:0.8rem; color:#F3F4F6;'>{row[col_target_issue]}</div>", unsafe_allow_html=True)
-        st.markdown("</div>", unsafe_allow_html=True)
+                alerts_html += f"<div style='padding: 4px 8px; background: rgba(239,68,68,0.06); border-left: 3px solid #EF4444; border-radius:4px; margin-bottom:6px; font-size:0.8rem; color:#F3F4F6;'>{row[col_target_issue]}</div>"
+        alerts_html += "</div>"
+        st.markdown(alerts_html, unsafe_allow_html=True)
 
-    # --- PERSPECTIVE CONTROL SWITCHER BOARD ---
+    # --- INSTRUMENT PANEL VIEWPORT CORE ---
     st.markdown("<div class='panel-header'>🎛️ Instrument Panel Console Viewport</div>", unsafe_allow_html=True)
     console_view = st.radio(
         "Select Target Data Stream Perspective:",
@@ -156,7 +160,6 @@ with tab_command:
     )
 
     if not df_registry.empty and "Flag / Status" in df_registry.columns:
-        # Sift parameters dynamically using localized condition queries
         if "Anomalies" in console_view:
             df_filtered = df_registry[df_registry["Flag / Status"].str.contains("High|Low|Abnormal|Critical|Severe|Elevated|Missing|Anomaly", na=False, case=False)]
         elif "Normal" in console_view:
@@ -168,11 +171,8 @@ with tab_command:
         
         if not df_display.empty:
             grid_html = "<div class='cockpit-flex-grid'>"
-            
             for _, row in df_display.iterrows():
                 status_raw = str(row['Flag / Status']).strip()
-                
-                # Dynamic Class Evaluator - Solves the blanket red coloring flaw
                 is_anomaly = any(x in status_raw.lower() for x in ["high", "low", "abnormal", "critical", "severe", "elevated", "missing", "anomaly"])
                 card_class = "card-crit" if is_anomaly else "card-normal"
                 badge_class = "badge-critical" if is_anomaly else "badge-baseline"
@@ -181,7 +181,6 @@ with tab_command:
                 date_label = str(row['Date / Timeline']).strip() if pd.notna(row['Date / Timeline']) else 'No Date'
                 desc_label = str(row['Clinical Context / Interpretation (careful)']).strip() if pd.notna(row['Clinical Context / Interpretation (careful)']) else ''
                 
-                # Append structures cleanly with explicit date-stamps exposed
                 grid_html += f"""
                 <div class='command-card {card_class}'>
                     <div>
@@ -195,7 +194,6 @@ with tab_command:
                 """
                 if desc_label and desc_label.lower() != 'nan' and desc_label != '':
                     grid_html += f"<div class='metric-desc'>{desc_label}</div>"
-                
                 grid_html += "</div>"
                 
             grid_html += "</div>"
@@ -207,10 +205,18 @@ with tab_command:
     st.markdown("<div class='panel-header'>💊 Strategies & Screenings</div>", unsafe_allow_html=True)
     col_tx, col_pd = st.columns(2)
     with col_tx:
-        st.markdown("<div class='command-card card-normal' style='min-height:180px; max-width: 100%; flex: 1;'>", unsafe_allow_html=True)
-        st.write("🏋️‍♂️ **Active Treatment / Exercise Tracking Loops**")
-        st.markdown("<div style='font-size:0.85rem; line-height:1.45;'>• <strong>Parenteral Repletion Regimen:</strong> Bypassing eosinophilic mucosal blocks.<br>• <strong>Methylation Support:</strong> Lowering high systemic neurotoxic Homocysteine volumes.<br>• <strong>Sacroiliac Joint Decompression:</strong> Targeted routines to unburden Castellvi IIIA segment mechanics.</div>", unsafe_allow_html=True)
-        st.markdown("</div>", unsafe_allow_html=True)
+        # FIXED: Compressed layout structures to eliminate multi-line spaces
+        tx_html = """
+        <div class='command-card card-normal' style='min-height:180px; max-width: 100%; flex: 1;'>
+            <div style='font-weight:600; font-size:0.9rem; margin-bottom:8px;'>🏋️‍♂️ Active Treatment / Exercise Tracking Loops</div>
+            <div style='font-size:0.85rem; line-height:1.45;'>
+                • <strong>Parenteral Repletion Regimen:</strong> Bypassing eosinophilic mucosal blocks.<br>
+                • <strong>Methylation Support:</strong> Lowering high systemic neurotoxic Homocysteine volumes.<br>
+                • <strong>Sacroiliac Joint Decompression:</strong> Targeted routines to unburden Castellvi IIIA segment mechanics.
+            </div>
+        </div>
+        """
+        st.markdown(tx_html, unsafe_allow_html=True)
     with col_pd:
         st.markdown("<div class='command-card card-normal' style='min-height:180px; max-width: 100%; flex: 1;'>", unsafe_allow_html=True)
         st.write("🔬 **Pending / Ordered Specialized Screenings (Dr. Domingues)**")
